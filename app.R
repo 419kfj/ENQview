@@ -168,7 +168,12 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                         HTML("</li>"),
                         HTML("</ul>")
                ),
-               navbarMenu("NLP2023関係",
+               navbarMenu("言語処理学会関係",
+                          tabPanel(title = "NLP2024発表論文", value = 4,
+                                   tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
+                                               src="NLP2024_20240112_v1.2.pdf" #PDFファイルは、www フォルダに格納
+                                   )
+                          ),
                           tabPanel(title = "NLP2023発表論文", value = 4,
                                    tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
                                                src="https://www.anlp.jp/proceedings/annual_meeting/2023/pdf_dir/Q1-11.pdf"
