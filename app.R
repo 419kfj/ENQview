@@ -202,7 +202,18 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                                      img(src="job_kouji_ojigi.png", height = 500, width = 300) # www フォルダに格納
                                    )
                           )
-               )# navbarMenu close
+               ),# navbarMenu close
+　　　　　　　navbarMenu("日本社会学会関係",
+　　　　　　　　　　　　  tabPanel(title = "2024-97回全国大会 11/9−10",  value = 4,
+　　　　　　　　　　　　　　　　　 tags$iframe(style = "height:800px; width:100%; scrolling=yes", #400px
+              　　　　　　　　　　 src = "https://jss-sociology.org/meeting/20231120post-15476/" 
+              　　　　　　　　　　 )),
+                          tabPanel(title = "2023-96回全国大会",value = 4,
+                                   tags$iframe(style = "height:800px; width:100%; scrolling=yes", #400px
+                                   src = "https://jss-sociology.org/meeting_archives/20221226post-13972/"
+                                   )),
+              
+                 )# navbarMenu close
 )
   
 #-------------------------------------------------------------------------------
