@@ -18,9 +18,10 @@ library(DT)
 library(gtsummary)
 library(gt)
 
-# データ読み込みと整形
+#-------------------------------------------------------------------------------
+# データ読み込みと前処理整形
 
-# Data load from CYDER_ENQ4/data/
+# Data load from CYDER_ENQ4/data/　← 別のディレクトリからもってくる
 load("../CYDER_ENQ4/data/CYDER2020A.rda")
 CYDER2020A %>% mutate(イン発生=recode_factor(イン発生,"はい（アンケート１１－２にもお答えください）"="はい"),
                       訓練演習=recode_factor(訓練演習,"定期的な訓練を行っている（アンケート１２−２にもお答えください）"="定期的に行っている",
@@ -45,15 +46,16 @@ load("../CYDER_ENQ4/data/CYDER2019A.rda")
 load("../CYDER_ENQ4/data/CYDER2019B1.rda")
 load("../CYDER_ENQ4/data/CYDER2019B2.rda")
 
-#
+#-------------------------------------------------------------------------------
 # Define UI for application 
 #
 ui <- navbarPage("CYDER受講者アンケート分析",
                tabPanel("About",
-                        h1("CYDER受講者の受講後アンケートの分析ツールです。"),
+                        h1("CYDER受講者の受講後アンケートの分析ツール"),
                         h2("アプリケーション概要"),
-                        p("基本集計、調査票、関連リンク、を掲載しています。"),
+                        p("基本集計、調査票、関連リンク、を掲載"),
                         helpText("構成上の要望うけつけてます。"),
+                        p("ver1.6 2024/01/30 gitでversion管理を開始"),
 　　　　　　　　　　　　p("ver1.5 2023/10/23 クロス集計にgtsummary::tbl_crossを適用"),
                         p("ver1.0 2023/06/12 プロトタイプから利用可能なレベルにしてリリース"),
                         HTML("<ul>"),
@@ -128,7 +130,9 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                         h3("参考資料 PDFはブラウザの設定viewerで開きます"),
                         tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
                                     #src="./CYDER_ENQ3/data/CYDER2020_ENQ_20200806.pdf"
-                                    src="./data/CYDER2020_ENQ_20200806.pdf"
+                                    #src="./data/CYDER2020_ENQ_20200806.pdf"
+                                    #src="../CYDER_ENQ4/data/CYDER2020_ENQ_20200806.pdf"
+                                    src="http://172.27.10.50/~fujimoto/CYDER2020_ENQ_20200806_A.pdf"
                         ),
                         HTML("<ul>"),
                         HTML("<li>"),
@@ -167,13 +171,11 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                navbarMenu("NLP2023関係",
                           tabPanel(title = "NLP2023発表論文", value = 4,
                                    tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                               #src="./CYDER_ENQ3/data/CYDER2020_ENQ_20200806.pdf"
                                                src="https://www.anlp.jp/proceedings/annual_meeting/2023/pdf_dir/Q1-11.pdf"
                                    )
                           ),
                           tabPanel(title = "NLP2023発表パネル", value = 4,
                                    tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                               #src="./CYDER_ENQ3/data/CYDER2020_ENQ_20200806.pdf"
                                                src="https://419kfj.sakura.ne.jp/db/wp-content/uploads/2023/04/NLP2023_03091057.pdf"
                                    )
                           ),
@@ -186,13 +188,13 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                                    h2("スミマセン、まだ工事中です。"),
                                    sidebarPanel(),
                                    mainPanel(
-                                     img(src="job_kouji_ojigi.png", height = 300, width = 300)
+                                     img(src="job_kouji_ojigi.png", height = 500, width = 300) # www フォルダに格納
                                    )
                           )
                )# navbarMenu close
 )
   
-#
+#-------------------------------------------------------------------------------
 # Define server logic required to draw outlut tables and graphs
 #
 server <- function(input, output, session) {
@@ -297,7 +299,7 @@ server <- function(input, output, session) {
     })
   }
 
-#
+#-------------------------------------------------------------------------------
 # Run the application 
 #
 shinyApp(ui = ui, server = server)
