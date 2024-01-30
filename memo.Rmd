@@ -5,6 +5,12 @@ date: "2023-10-23"
 output: html_document
 ---
 
+# 履歴
+
+- 2024/01/30 gitで管理開始
+- 2023−10−23 イニチアル version
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
