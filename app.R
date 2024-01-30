@@ -51,11 +51,11 @@ load("../CYDER_ENQ4/data/CYDER2019B2.rda")
 #
 ui <- navbarPage("CYDER受講者アンケート分析",
                tabPanel("About",
-                        h1("CYDER受講者の受講後アンケートの分析ツール"),
+                        h1("CYDER受講者の受講後アンケート簡易分析"),
                         h2("アプリケーション概要"),
                         p("基本集計、調査票、関連リンク、を掲載"),
                         helpText("構成上の要望うけつけてます。"),
-                        p("ver1.6 2024/01/30 gitでversion管理を開始"),
+                        p("ver1.6 2024/01/30 gitでversion管理を開始、NLP2024論文をLINK"),
 　　　　　　　　　　　　p("ver1.5 2023/10/23 クロス集計にgtsummary::tbl_crossを適用"),
                         p("ver1.0 2023/06/12 プロトタイプから利用可能なレベルにしてリリース"),
                         HTML("<ul>"),
@@ -161,10 +161,16 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                tabPanel("関連リンク集",
                         HTML("<ul>"),
                         HTML("<li>"),
-                        a(href = "https://419kfj.sakura.ne.jp/db/nlp2023-fujimoto-ohata/", "NLP2023 パネル発表補足リンク"),
+                        a(href = "https://www.anlp.jp/nlp2024/", "NLP2024大会リンク"),
                         HTML("</li>"),
                         HTML("<li>"),
-                        a(href = "https://cyder.nict.go.jp/", "`CYDER`とはなにか！"),
+                        a(href = "https://www.anlp.jp/nlp2023/", "NLP2023大会リンク"),
+                        HTML("</li>"),
+                        HTML("<li>"),
+                        　　　a(href = "https://419kfj.sakura.ne.jp/db/nlp2023-fujimoto-ohata/", "NLP2023 パネル発表補足リンク"),
+                        HTML("</li>"),
+                        HTML("<li>"),
+                        　　　a(href = "https://cyder.nict.go.jp/", "`CYDER`とはなにか！"),
                         HTML("</li>"),
                         HTML("</ul>")
                ),
@@ -184,7 +190,7 @@ ui <- navbarPage("CYDER受講者アンケート分析",
                                                src="https://419kfj.sakura.ne.jp/db/wp-content/uploads/2023/04/NLP2023_03091057.pdf"
                                    )
                           ),
-                          tabPanel("発表内容補足スライド",value = 4,
+                          tabPanel("NLP2023発表補足スライド",value = 4,
                                    tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
                                                src="https://419kfj.sakura.ne.jp/db/wp-content/uploads/2023/03/NLP2023SupGraphv1.2.pdf"
                                    )
