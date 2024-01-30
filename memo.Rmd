@@ -1,0 +1,38 @@
+---
+title: "gtsummary::tbl_cross の動作確認"
+author: "kazuo.fujimoto2007@gmail.com"
+date: "2023-10-23"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(gtsummary)
+```
+
+```{r}
+load("../CYDER_ENQ4/data/CYDER2020A.rda")
+```
+
+```{r}
+CYDER2020A -> .d
+```
+
+```{r}
+.d %>% gtsummary::tbl_cross("理解","イン発生")
+```
+
+```{r}
+CYDER2020A %>% names
+c(1,2,3,7,10,17,26,28,29:42) -> omit_col
+```
+
+
+```{r}
+CYDER2020A[,-omit_col] %>% gtsummary::tbl_summary() %>% bold_labels()
+```
+
