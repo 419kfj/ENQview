@@ -24,13 +24,15 @@ showtext_auto(TRUE)
 # データ読み込みと前処理整形
 
 load("./data/iwate.f.mac.rda")
+load("./data/dd3.rda")
+Bunka <- .dd3 %>% as.data.frame()
 
 #-------------------------------------------------------------------------------
 # Define UI for application 
 #
-ui <- navbarPage("iwate 調査データ簡易集計",
+ui <- navbarPage("調査データ簡易集計",
                tabPanel("About",
-                        h1("iwateデータを分析する"),
+                        h1("データを分析する"),
                         h2("アプリケーション概要"),
                         p("基本集計、調査票、関連リンク、を掲載"),
                         helpText("構成上の要望うけつけてます。"),
@@ -54,15 +56,17 @@ ui <- navbarPage("iwate 調査データ簡易集計",
                tabPanel(
                  "基本集計",
 #                 h1("分析対象df（.rda）をuploadしてください。"),
-                 h1("iwateデータの基本集計を行います。"),
+                 h1("データの基本集計を行います。"),
                  sidebarPanel(
                    selectInput(
                      "selected_data_for_plot",
                      label = h3("データセットを選択してください。"),
-                     choices = c("iwate" = "iwate.f"), selected = "iwate"),
+                     choices = c("iwate" = "iwate.f",
+                                 "Bunka"="Bunka"), selected = "iwate"),
                    selectInput("select_input_data_for_hist",
                                "集計する変数",
-                                choices = colnames(iwate.f),
+                               choices = colnames("selected_data_for_plot"),
+                              #  choices = colnames(iwate.f),
                                 selected =  colnames(iwate.f)[3]),
                    selectInput("select_input_data_for_cross",
                                "クロス集計する変数",
@@ -70,6 +74,13 @@ ui <- navbarPage("iwate 調査データ簡易集計",
                    selectInput("select_input_data_for_layer",
                                "層化する変数",
                                choices = NULL),
+                   selectInput("variables", "MA変数の選択:", 
+                               choices =  NULL,#colnames(iwate.f),#colnames("selected_data_for_plot"),
+                               multiple = TRUE,
+                               selectize = FALSE#,
+                               #selected =  colnames(iwate.f)[3]
+                               ),  # 複数選択を許可
+                   #plotOutput("MAplot")
                  ),
                  #----　MAIN Panel
                  mainPanel(
@@ -94,6 +105,14 @@ ui <- navbarPage("iwate 調査データ簡易集計",
                                         plotOutput("crosschart2",width = 600, height = 600),
                                         h3("χ2乗検定"),
                                         verbatimTextOutput("chisq_test")
+                               ),
+                               tabPanel("MA plot",
+                                        h2("MA変数集計（gtsummary::tbl_cross）"),
+                                        #  verbatimTextOutput("crosstable"),
+                                        #gt_output(outputId = "my_gt_table"),
+                                        plotOutput("MAplot",width = 600, height = 600)
+                                        #h3("χ2乗検定"),
+                                        #verbatimTextOutput("chisq_test")
                                ),
                                tabPanel("pairs",
                                         h2("GGally::pairs"),
@@ -129,9 +148,6 @@ ui <- navbarPage("iwate 調査データ簡易集計",
                         HTML("</li>"),
                         HTML("<li>"),
                         　　　a(href = "https://419kfj.sakura.ne.jp/db/nlp2023-fujimoto-ohata/", "NLP2023 パネル発表補足リンク"),
-                        HTML("</li>"),
-                        HTML("<li>"),
-                        　　　a(href = "https://cyder.nict.go.jp/", "`CYDER`とはなにか！"),
                         HTML("</li>"),
                         HTML("</ul>")
                ),
@@ -194,11 +210,16 @@ server <- function(input, output, session) {
                      "titanic" = data.frame(lapply(data.frame(Titanic), 
                                                    function(i){rep(i, data.frame(Titanic)[, 5])})),
                      "Womenlf" = Womenlf,
-                     "iwate.f" = iwate.f[,-c(1,2)]
+                     "iwate.f" = iwate.f[,-c(1,2)],
+                     "Bunka" = Bunka[,-c(1,2)]
       )
       updateSelectInput(session, "select_input_data_for_hist", choices = colnames(data))
       updateSelectInput(session, "select_input_data_for_cross", choices = c(" ",colnames(data)))
       updateSelectInput(session, "select_input_data_for_layer", choices = c(" ",colnames(data)))
+    #  updateSelectInput(session, "valiables", choices = colnames(data))
+      updateSelectInput(session, "variables",
+                        choices = colnames(data),
+                        selected = colnames(data)[1:2]) 
       return(data)
     })
     # barplot by ggplot2
@@ -260,6 +281,27 @@ server <- function(input, output, session) {
       chisq.test(table(data_for_plot()[,input$select_input_data_for_cross],
                        data_for_plot()[,input$select_input_data_for_hist]))
     })
+    # MA plot
+    output$MAplot <- renderPlot({
+      selected_vars <- input$variables  # 選択された変数を取得
+      if (length(selected_vars) > 0) {
+        # 選択された変数を用いてプロット
+        selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
+        selected_data %>% dplyr::summarise(across(everything(), ~ mean(. == 1,na.rm =TRUE))) %>%
+          pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
+        
+        ggplot(ratio_df, aes(x = Question, y = Ratio)) +
+          geom_bar(stat = "identity", fill = "skyblue") +
+          scale_y_continuous(labels = scales::percent_format()) +
+          labs(title = selected_vars,
+               x = "質問項目",
+               y = "割合（%）") +
+          theme_minimal()
+ #       matplot(selected_data, type = "l", lty = 1, col = 1:ncol(selected_data))
+      }
+    })
+    
+    
     # 度数分布表
     output$simple_table <- DT::renderDataTable({ #renderTable({#
       table(data_for_plot()[,input$select_input_data_for_hist]) -> tmp
