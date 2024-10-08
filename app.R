@@ -25,7 +25,18 @@ showtext_auto(TRUE)
 
 load("./data/iwate.f.mac.rda")
 load("./data/dd3.rda")
-Bunka <- .dd3 %>% as.data.frame()
+Bunka <- .dd3 %>% as.data.frame() %>% 
+  mutate(across(c(43:47,#Q4
+                  74:89,#Q7
+                  193:204,#Q14
+                  258:277,#Q36
+                  278:293, #Q37
+                  297:303 #Q41
+                  ), ~ case_when(
+  . == "On"  ~ 1,
+  . == "Off" ~ 0,
+  TRUE ~ NA_real_
+)))
 
 #-------------------------------------------------------------------------------
 # Define UI for application 
