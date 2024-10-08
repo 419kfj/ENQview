@@ -87,14 +87,14 @@ ui <- navbarPage("iwate 調査データ簡易集計",
                                         h3("χ2乗検定"),
                                         verbatimTextOutput("chisq_test")
                                ),
-                               # tabPanel("2変数分析（層化）",
-                               #          h2("クロス集計（gtsummary::tbl_cross）"),
-                               #          #  verbatimTextOutput("crosstable"),
-                               #          gt_output(outputId = "my_gt_table"),
-                               #          plotOutput("crosschart2",width = 600, height = 600),
-                               #          h3("χ2乗検定"),
-                               #          verbatimTextOutput("chisq_test")
-                               # ),
+                               tabPanel("2変数分析（層化）",
+                                        h2("クロス集計（gtsummary::tbl_cross）"),
+                                        #  verbatimTextOutput("crosstable"),
+                                        gt_output(outputId = "my_gt_table"),
+                                        plotOutput("crosschart2",width = 600, height = 600),
+                                        h3("χ2乗検定"),
+                                        verbatimTextOutput("chisq_test")
+                               ),
                                tabPanel("pairs",
                                         h2("GGally::pairs"),
                                         plotOutput("pairs",width = 600, height = 600)
@@ -103,20 +103,21 @@ ui <- navbarPage("iwate 調査データ簡易集計",
                                         h2("データ一覧"),
                                         DT::dataTableOutput("table_for_plot")
                                ),
-                               tabPanel("自由記述文分析")
+#                               tabPanel("自由記述文分析")
                    )
               　)
                ),
                #--------------------------------
                tabPanel("調査票",
-                        h3("参考資料 PDFはブラウザの設定viewerで開きます"),
-#                       tags$a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "PDFを開く", target = "_blank"),
-                        tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                    #src="./CYDER_ENQ3/data/CYDER2020_ENQ_20200806.pdf"
-                                    #src="./data/CYDER2020_ENQ_20200806.pdf"
-                                    src="http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf"
-                        ),
-                        helpText("shinyでPDFをviewできるようにします。")
+#                         h3("参考資料 PDFはブラウザの設定viewerで開きます"),
+# #                       tags$a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "PDFを開く", target = "_blank"),
+#                         tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
+#                                     #src="./CYDER_ENQ3/data/CYDER2020_ENQ_20200806.pdf"
+#                                     #src="./data/CYDER2020_ENQ_20200806.pdf"
+#                                     src="http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf"
+#                         ),
+                        a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
+                        helpText("別TabでPDFが開きます")
                ),
                tabPanel("関連リンク集",
                         HTML("<ul>"),
@@ -244,14 +245,6 @@ server <- function(input, output, session) {
                  shade=TRUE,las=2,
                  labeling=labeling_values
           )
-      # data_for_plot()[,c(input$select_input_data_for_hist,input$select_input_data_for_cross)] %>% 
-      #   structable() %>% 
-      #   mosaic(#main=str_c(input$select_input_data_for_cross,"-",input$select_input_data_for_hist),
-      #     shade=TRUE,las=2,
-      #     labeling=labeling_values
-      #     #pop=FALSE
-      #   )
-       #labeling_cells(text=tab,clip=FALSE)(as.table(.tbl.p))
     })
 
     # gtsummary でクロス表表示
