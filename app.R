@@ -122,14 +122,26 @@ ui <- navbarPage("調査データ簡易集計",
                                         verbatimTextOutput("chisq_test")
                                ),
                                tabPanel("MA plot(Bar)",
-                                        h2("MA変数集計（gtsummary::tbl_cross）"),
+                                        h2("MA変数集計"),
                                         plotOutput("MAplot",width = 600, height = 600)
                                ),
                                
                                tabPanel("MA plot(Dot)",
-                                        h2("MA変数集計（gtsummary::tbl_cross）"),
+                                        h2("MA変数集計"),
                                         plotOutput("MAplot_Dot",width = 600, height = 600)
                                ),
+                               
+                               tabPanel("層化 MA plot",
+                                        h2("層化MA変数集計"),
+                                        plotOutput("MAplot_lineDot",width = 600, height = 400),
+                                        plotOutput("MAplot_lineDotwarp",width = 600, height = 600)
+                               ),
+                               
+                               tabPanel("Grid回答 mosaic表示",
+                                        h2("Grid回答mosaic表示"),
+                                        plotOutput("GridAnswer_mosaic",width = 600, height = 600)
+                               ),
+                               
                                tabPanel("pairs",
                                         h2("GGally::pairs"),
                                         plotOutput("pairs",width = 600, height = 600)
@@ -149,22 +161,22 @@ ui <- navbarPage("調査データ簡易集計",
 #                 h1("MAデータの基本集計を行います。"),
 #                 sidebarPanel(
 #                   selectInput(
-#                     "selected_data_for_plot",
+#                     "selected_data_for_plot2",
 #                     label = h3("データセットを選択してください。"),
 #                     choices = c("iwate" = "iwate.f",
 #                                 "Bunka"="Bunka"), selected = "iwate"),
-#                   selectInput("select_input_data_for_hist",
+#                   selectInput("select_input_data_for_hist2",
 #                               "集計する変数",
-#                               choices = colnames("selected_data_for_plot"),
+#                               choices = colnames("selected_data_for_plot2"),
 #                               #  choices = colnames(iwate.f),
 #                               selected =  colnames(iwate.f)[3]),
-#                   selectInput("select_input_data_for_cross",
+#                   selectInput("select_input_data_for_cross2",
 #                               "クロス集計する変数",
 #                               choices = NULL),
-#                   selectInput("select_input_data_for_layer",
+#                   selectInput("select_input_data_for_layer2",
 #                               "層化する変数",
 #                               choices = NULL),
-#                   selectInput("variables", "MA変数の選択:", 
+#                   selectInput("variables2", "MA変数の選択:",
 #                               choices =  NULL,#colnames(iwate.f),#colnames("selected_data_for_plot"),
 #                               multiple = TRUE,
 #                               selectize = FALSE#,
@@ -201,7 +213,7 @@ ui <- navbarPage("調査データ簡易集計",
 #                        h2("MA変数集計（gtsummary::tbl_cross）"),
 #                        plotOutput("MAplot",width = 600, height = 600)
 #               ),
-#               
+# 
 #               tabPanel("MA plot(Dot)",
 #                        h2("MA変数集計（gtsummary::tbl_cross）"),
 #                        plotOutput("MAplot_Dot",width = 600, height = 600)
@@ -312,6 +324,18 @@ server <- function(input, output, session) {
       updateSelectInput(session, "variables",
                         choices = colnames(data),
                         selected = colnames(data)[1:2]) 
+      # updateSelectInput(session, "select_input_data_for_hist2", choices = colnames(data))
+      # updateSelectInput(session, "select_input_data_for_cross2", choices = c(" ",colnames(data)))
+      # updateSelectInput(session, "select_input_data_for_layer2", choices = c(" ",colnames(data)))
+      # #  updateSelectInput(session, "valiables", choices = colnames(data))
+      # updateSelectInput(session, "variables2",
+      #                   choices = colnames(data),
+      #                   selected = colnames(data)[1:2]) 
+      # 
+      # 
+      
+      
+      
       return(data)
     })
     # barplot by ggplot2
@@ -425,6 +449,110 @@ server <- function(input, output, session) {
                x = "割合（%）",y = "質問項目")
     　　}
     })
+    
+    # 層化MA折れ線グラフ
+    output$MAplot_lineDot <- renderPlot({
+      selected_vars <- input$variables
+      if (length(selected_vars) > 0) {
+        selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
+        gp_vari <- input$select_input_data_for_layer #"最終学歴"
+        df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
+          dplyr::summarise(度数=n(),across(c(74:89), ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
+
+        MA_group_tbl %>% select(-度数) %>% 
+          pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
+                       names_to = "variable",         # 変数名の列を"variable"として格納
+                       values_to = "value") -> df_long
+        
+        ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable, 
+                            shape =variable, group = variable)) + 
+          geom_line(aes(color = variable)) +  # 折れ線グラフ
+          geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら）
+          labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
+          theme_minimal() +  # 見た目をシンプルに
+          scale_color_discrete() +
+          #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
+          scale_shape_manual(values = 1:16) 
+        }
+    })
+    
+    # 層化MA warp Faset
+    
+    output$MAplot_lineDotwarp <- renderPlot({
+      selected_vars <- input$variables
+      if (length(selected_vars) > 0) {
+        selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
+        gp_vari <- input$select_input_data_for_layer #"最終学歴"
+        df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
+          dplyr::summarise(度数=n(),across(c(74:89), ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
+        
+        MA_group_tbl %>% select(-度数) %>% 
+          pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
+                       names_to = "variable",         # 変数名の列を"variable"として格納
+                       values_to = "value") -> df_long
+        
+        
+        ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
+          geom_line() + geom_point() +
+          facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
+          labs(x = "Group", y = "Value") +
+          theme_minimal() + 
+          theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
+        
+        
+        # ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable, 
+        #                     shape =variable, group = variable)) + 
+        #   geom_line(aes(color = variable)) +  # 折れ線グラフ
+        #   geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら）
+        #   labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
+        #   theme_minimal() +  # 見た目をシンプルに
+        #   scale_color_discrete() +
+        #   #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
+        #   scale_shape_manual(values = 1:16) 
+      }
+    })
+    
+    
+    ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
+      geom_line() + geom_point() +
+      facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
+      labs(x = "Group", y = "Value") +
+      theme_minimal() + 
+      theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
+    
+    
+    
+    
+    
+# Grid Mosaic
+# 
+    
+    output$GridAnswer_mosaic <- renderPlot({
+      selected_vars <- input$variables 
+      count_categories <- function(x) {
+        table(factor(x, levels = c("++", "+", "-", "--", "DK", "無回答"), exclude = NULL))
+      }
+      
+      # df の 1 列目から 20 列目の各列ごとにカテゴリを集計
+      category_count_tbl <- data_for_plot() %>%
+        dplyr::summarise(across(selected_vars, ~ count_categories(.))) 
+      
+      category_count_tbl %>% as.matrix() -> cat_tbl
+      rownames(cat_tbl) <- c("++","+","-","--","DK","無回答")
+      cat_tbl
+      
+      rownames(t(cat_tbl)) -> rnames
+      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:20) %>% 
+        mutate(Like=`++`+`+`) %>% 
+        arrange(desc(Like)) %>% 
+        select(IDn) %>% unlist %>% 
+        setNames(NULL) -> order_vec
+      
+      t(cat_tbl)[order_vec,] %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
+                                        margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
+      
+    })
+    
     
     
     # 度数分布表
