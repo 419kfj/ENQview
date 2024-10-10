@@ -25,18 +25,22 @@ showtext_auto(TRUE)
 
 load("./data/iwate.f.mac.rda")
 load("./data/dd3.rda")
-Bunka <- .dd3 %>% as.data.frame() %>% 
-  mutate(across(c(43:47,#Q4
+Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+  mutate(across(c(10:21, #Q2
+  　　　　　　　　43:47,#Q4
                   74:89,#Q7
                   193:204,#Q14
                   258:277,#Q36
                   278:293, #Q37
                   297:303 #Q41
-                  ), ~ case_when(
-  . == "On"  ~ 1,
-  . == "Off" ~ 0,
-  TRUE ~ NA_real_
-)))
+                  ), 
+          ~ case_when(
+            . == "On"  ~ 1,
+            . == "Off" ~ 0,
+            TRUE ~ NA_real_
+            )
+          )
+         )
 
 #-------------------------------------------------------------------------------
 # Define UI for application 
@@ -117,13 +121,14 @@ ui <- navbarPage("調査データ簡易集計",
                                         h3("χ2乗検定"),
                                         verbatimTextOutput("chisq_test")
                                ),
-                               tabPanel("MA plot",
+                               tabPanel("MA plot(Bar)",
                                         h2("MA変数集計（gtsummary::tbl_cross）"),
-                                        #  verbatimTextOutput("crosstable"),
-                                        #gt_output(outputId = "my_gt_table"),
                                         plotOutput("MAplot",width = 600, height = 600)
-                                        #h3("χ2乗検定"),
-                                        #verbatimTextOutput("chisq_test")
+                               ),
+                               
+                               tabPanel("MA plot(Dot)",
+                                        h2("MA変数集計（gtsummary::tbl_cross）"),
+                                        plotOutput("MAplot_Dot",width = 600, height = 600)
                                ),
                                tabPanel("pairs",
                                         h2("GGally::pairs"),
@@ -138,6 +143,82 @@ ui <- navbarPage("調査データ簡易集計",
               　)
                ),
                #--------------------------------
+#                tabPanel(
+#                 "基本集計２",
+#                 #                 h1("分析対象df（.rda）をuploadしてください。"),
+#                 h1("MAデータの基本集計を行います。"),
+#                 sidebarPanel(
+#                   selectInput(
+#                     "selected_data_for_plot",
+#                     label = h3("データセットを選択してください。"),
+#                     choices = c("iwate" = "iwate.f",
+#                                 "Bunka"="Bunka"), selected = "iwate"),
+#                   selectInput("select_input_data_for_hist",
+#                               "集計する変数",
+#                               choices = colnames("selected_data_for_plot"),
+#                               #  choices = colnames(iwate.f),
+#                               selected =  colnames(iwate.f)[3]),
+#                   selectInput("select_input_data_for_cross",
+#                               "クロス集計する変数",
+#                               choices = NULL),
+#                   selectInput("select_input_data_for_layer",
+#                               "層化する変数",
+#                               choices = NULL),
+#                   selectInput("variables", "MA変数の選択:", 
+#                               choices =  NULL,#colnames(iwate.f),#colnames("selected_data_for_plot"),
+#                               multiple = TRUE,
+#                               selectize = FALSE#,
+#                               #selected =  colnames(iwate.f)[3]
+#                   ),  # 複数選択を許可
+#                   #plotOutput("MAplot")
+#                 ),
+# #------
+# #----　MAIN Panel
+# mainPanel(
+#   tabsetPanel(type = "tabs",
+#               tabPanel("単変数集計",
+#                        h2("基本集計"),
+#                        plotOutput("barchart"),
+#                        DT::dataTableOutput("simple_table"), # server.R も対応させること！
+#               ),
+#               tabPanel("2変数分析",
+#                        h2("クロス集計（gtsummary::tbl_cross）"),
+#                        #  verbatimTextOutput("crosstable"),
+#                        gt_output(outputId = "my_gt_table"),
+#                        plotOutput("crosschart",width = 600, height = 600),
+#                        h3("χ2乗検定"),
+#                        verbatimTextOutput("chisq_test")
+#               ),
+#               tabPanel("2変数分析（層化）",
+#                        h2("クロス集計（gtsummary::tbl_cross）"),
+#                        #  verbatimTextOutput("crosstable"),
+#                        gt_output(outputId = "my_gt_table"),
+#                        plotOutput("crosschart2",width = 600, height = 600),
+#                        h3("χ2乗検定"),
+#                        verbatimTextOutput("chisq_test")
+#               ),
+#               tabPanel("MA plot(Bar)",
+#                        h2("MA変数集計（gtsummary::tbl_cross）"),
+#                        plotOutput("MAplot",width = 600, height = 600)
+#               ),
+#               
+#               tabPanel("MA plot(Dot)",
+#                        h2("MA変数集計（gtsummary::tbl_cross）"),
+#                        plotOutput("MAplot_Dot",width = 600, height = 600)
+#               ),
+#               tabPanel("pairs",
+#                        h2("GGally::pairs"),
+#                        plotOutput("pairs",width = 600, height = 600)
+#               ),
+#               tabPanel("データ一覧",
+#                        h2("データ一覧"),
+#                        DT::dataTableOutput("table_for_plot")
+#               ),
+#               #                               tabPanel("自由記述文分析")
+#   )
+# )
+#                ),
+#-----------------------------------------------------------------------------------------------
                tabPanel("調査票",
 #                         h3("参考資料 PDFはブラウザの設定viewerで開きます"),
 # #                       tags$a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "PDFを開く", target = "_blank"),
@@ -292,6 +373,17 @@ server <- function(input, output, session) {
       chisq.test(table(data_for_plot()[,input$select_input_data_for_cross],
                        data_for_plot()[,input$select_input_data_for_hist]))
     })
+    
+    # gtsummay でMA表
+    output$MA_gt_table <- render_gt(
+      data_for_plot() %>% tbl_cross(row = input$select_input_data_for_cross,
+                                    col = input$select_input_data_for_hist,
+                                    percent = "row") %>% 
+        add_p(test="chisq.test") %>% 
+        bold_labels() %>% 
+        as_gt()
+    )
+
     # MA plot
     output$MAplot <- renderPlot({
       selected_vars <- input$variables  # 選択された変数を取得
@@ -310,6 +402,28 @@ server <- function(input, output, session) {
           theme_minimal()
  #       matplot(selected_data, type = "l", lty = 1, col = 1:ncol(selected_data))
       }
+    })
+    
+    
+    # MAplot Cleverland Dot Plot
+    
+    output$MAplot_Dot <- renderPlot({
+      selected_vars <- input$variables  # 選択された変数を取得
+      if (length(selected_vars) > 0) {
+        # 選択された変数を用いてプロット
+        selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
+        selected_data %>% dplyr::summarise(across(everything(), ~ mean(. == 1,na.rm =TRUE))) %>%
+          pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
+        
+        ratio_df %>% ggplot(aes(x=Ratio, y=reorder(Question,Ratio))) +
+          geom_point(size=3) +
+          theme_bw() +
+          theme(panel.grid.major.x = element_blank(),
+                panel.grid.minor.x = element_blank(),
+                panel.grid.major.y = element_line(colour="grey60",linetype="dashed")) +
+          labs(title = selected_vars,
+               x = "割合（%）",y = "質問項目")
+    　　}
     })
     
     
