@@ -40,8 +40,21 @@ Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
             TRUE ~ NA_real_
             )
           )
-         )
-
+  
+       ) %>% 
+  mutate(across(c(107:139,#Q9
+                  120:137,#Q10
+                  138:159,#Q11
+                  ),
+                ~ case_when(
+                  . == "好みである" ~ "A",
+                  . == "好みでない" ~ "B",
+                  . == "見たことがあるが、どちらでもない" ~ "C",
+                  . == "タイトルは知っているが、見たことがない" ~ "D",
+                  . == "知らない" ~ "E",
+                )
+        )
+  )
 #-------------------------------------------------------------------------------
 # Define UI for application 
 #
@@ -137,9 +150,15 @@ ui <- navbarPage("調査データ簡易集計",
                                         plotOutput("MAplot_lineDotwarp",width = 600, height = 600)
                                ),
                                
-                               tabPanel("Grid回答 mosaic表示",
+                               tabPanel("Grid回答++/-- mosaic表示",
                                         h2("Grid回答mosaic表示"),
                                         plotOutput("GridAnswer_mosaic",width = 600, height = 600)
+                               ),
+                               
+                               
+                               tabPanel("Grid回答 LK/DLK mosaic表示",
+                                        h2("Grid回答mosaic表示"),
+                                        plotOutput("GridAnswer2_mosaic",width = 600, height = 600)
                                ),
                                
                                tabPanel("pairs",
@@ -457,7 +476,7 @@ server <- function(input, output, session) {
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
         gp_vari <- input$select_input_data_for_layer #"最終学歴"
         df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
-          dplyr::summarise(度数=n(),across(c(74:89), ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
+          dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
 
         MA_group_tbl %>% select(-度数) %>% 
           pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
@@ -484,7 +503,7 @@ server <- function(input, output, session) {
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
         gp_vari <- input$select_input_data_for_layer #"最終学歴"
         df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
-          dplyr::summarise(度数=n(),across(c(74:89), ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
+          dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
         
         MA_group_tbl %>% select(-度数) %>% 
           pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
@@ -542,7 +561,7 @@ server <- function(input, output, session) {
       cat_tbl
       
       rownames(t(cat_tbl)) -> rnames
-      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:20) %>% 
+      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>% 
         mutate(Like=`++`+`+`) %>% 
         arrange(desc(Like)) %>% 
         select(IDn) %>% unlist %>% 
@@ -553,7 +572,40 @@ server <- function(input, output, session) {
       
     })
     
+    # Grid Mosaic 2 LK/DLK
+    # 
+　　
+        
+    output$GridAnswer2_mosaic <- renderPlot({
+      grid_ptn <- c("A","B","C","D","E","NA") 
+      selected_vars <- input$variables
+      count_categories <- function(x) {
+        table(factor(x, levels = grid_ptn,#c("++", "+", "-", "--", "DK", "無回答"),
+                     exclude = NULL))
+      }
+      
+      # df の 1 列目から 20 列目の各列ごとにカテゴリを集計
+      category_count_tbl <- data_for_plot() %>%
+        dplyr::summarise(across(selected_vars, ~ count_categories(.))) 
+      
+      category_count_tbl %>% as.matrix() -> cat_tbl
+      rownames(cat_tbl) <- grid_ptn #c("++","+","-","--","DK","無回答")
+      cat_tbl
+      
+      rownames(t(cat_tbl)) -> rnames
+      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>% 
+#        mutate(Like=`++`+`+`) %>% 
+        arrange(desc(A)) %>% 
+        select(IDn) %>% unlist %>% 
+        setNames(NULL) -> order_vec
+      
+      t(cat_tbl)[order_vec,] %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
+                                        margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
+      
+    })
     
+    
+        
     
     # 度数分布表
     output$simple_table <- DT::renderDataTable({ #renderTable({#
