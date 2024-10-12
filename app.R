@@ -24,8 +24,11 @@ showtext_auto(TRUE)
 # データ読み込みと前処理整形
 
 load("./data/iwate.f.mac.rda")
-load("./data/dd3.rda")
+load("./data/dd3.rda") # .dd3
+load(file="../../RStudio/文化と不平等202409/01.6_Recode/data/d3.rda")
+.dd <- .d3
 Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+#Bunka <- .d3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
   mutate(across(c(10:21, #Q2
   　　　　　　　　43:47,#Q4
                   74:89,#Q7
@@ -55,6 +58,42 @@ Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
                 )
         )
   )
+
+# recodeしたあとの.ddは、まだ、変数名に短縮をいれてない。
+Bunka2 <- .dd %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+  mutate(across(c(10:21, #Q2
+                  43:47,#Q4
+                  74:89,#Q7
+                  193:204,#Q14
+                  258:277,#Q36
+                  278:293, #Q37
+                  297:303 #Q41
+  ), 
+  ~ case_when(
+    . == "On"  ~ 1,
+    . == "Off" ~ 0,
+    TRUE ~ NA_real_
+  )
+  )
+  
+  ) %>% 
+  mutate(across(c(107:139,#Q9
+                  120:137,#Q10
+                  138:159,#Q11
+  ),
+  ~ case_when(
+    . == "好みである" ~ "A",
+    . == "好みでない" ~ "B",
+    . == "見たことがあるが、どちらでもない" ~ "C",
+    . == "タイトルは知っているが、見たことがない" ~ "D",
+    . == "知らない" ~ "E",
+  )
+  )
+  )
+
+
+
+
 #-------------------------------------------------------------------------------
 # Define UI for application 
 #
@@ -91,7 +130,9 @@ ui <- navbarPage("調査データ簡易集計",
                      "selected_data_for_plot",
                      label = h3("データセットを選択してください。"),
                      choices = c("iwate" = "iwate.f",
-                                 "Bunka"="Bunka"), selected = "Bunka"),
+                                 "Bunka"="Bunka"#,
+#                                 "Bunka"="BunkaRC"
+                                 ), selected = "Bunka"),
                    selectInput("select_input_data_for_hist",
                                "集計する変数",
                                choices = colnames("selected_data_for_plot"),
@@ -184,7 +225,9 @@ ui <- navbarPage("調査データ簡易集計",
 #                                     #src="./data/CYDER2020_ENQ_20200806.pdf"
 #                                     src="http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf"
 #                         ),
-                        a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
+a(href = "http://133.167.73.14/~kazuo/Bunka_questionnaire_20221212.pdf", "「文化と不平等」調査調査票",target = "_blank"),
+
+#                        a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
                         helpText("別TabでPDFが開きます")
                ),
                tabPanel("関連リンク集",
@@ -269,23 +312,10 @@ server <- function(input, output, session) {
       updateSelectInput(session, "variables",
                         choices = colnames(data),
                         selected = colnames(data)[1:2]) 
-      # updateSelectInput(session, "select_input_data_for_hist2", choices = colnames(data))
-      # updateSelectInput(session, "select_input_data_for_cross2", choices = c(" ",colnames(data)))
-      # updateSelectInput(session, "select_input_data_for_layer2", choices = c(" ",colnames(data)))
-      # #  updateSelectInput(session, "valiables", choices = colnames(data))
-      # updateSelectInput(session, "variables2",
-      #                   choices = colnames(data),
-      #                   selected = colnames(data)[1:2]) 
-      # 
-      # 
-      
-      
-      
       return(data)
     })
     # barplot by ggplot2
     output$barchart <- renderPlot({
-      # barplot(table(data_for_plot()[,input$select_input_data_for_hist]),las=2,main=input$select_input_data_for_hist)
       data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>% 
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1))
     })
@@ -446,28 +476,10 @@ server <- function(input, output, session) {
           theme_minimal() + 
           theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
         
-        
-        # ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable, 
-        #                     shape =variable, group = variable)) + 
-        #   geom_line(aes(color = variable)) +  # 折れ線グラフ
-        #   geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら）
-        #   labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
-        #   theme_minimal() +  # 見た目をシンプルに
-        #   scale_color_discrete() +
-        #   #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
-        #   scale_shape_manual(values = 1:16) 
       }
     })
     
-    
-    # ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
-    #   geom_line() + geom_point() +
-    #   facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
-    #   labs(x = "Group", y = "Value") +
-    #   theme_minimal() + 
-    #   theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
 
-    
 # Grid Mosaic
 # 
     
@@ -492,7 +504,8 @@ server <- function(input, output, session) {
         select(IDn) %>% unlist %>% 
         setNames(NULL) -> order_vec
       
-      t(cat_tbl)[order_vec,] %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
+#      t(cat_tbl)[order_vec,]
+      t(cat_tbl) %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
                                         margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
       
     })
@@ -524,7 +537,8 @@ server <- function(input, output, session) {
         select(IDn) %>% unlist %>% 
         setNames(NULL) -> order_vec
       
-      t(cat_tbl)[order_vec,] %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
+#      t(cat_tbl)[order_vec,] 
+      t(cat_tbl) %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
                                         margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
       
     })
