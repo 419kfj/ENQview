@@ -11,6 +11,7 @@
 # 2024/01/30 gitでの管理を開始
 
 library(shiny)
+library(FactoMineR)
 library(tidyverse)
 library(vcd)
 library(GGally)
@@ -195,7 +196,8 @@ ui <- navbarPage("調査データ簡易集計",
                                
                                tabPanel("Grid回答++/-- mosaic表示",
                                         h2("Grid回答mosaic表示"),
-                                        plotOutput("GridAnswer_mosaic",width = 600, height = 600)
+                                        plotOutput("GridAnswer_mosaic",width = 600, height = 600),
+                                        plotOutput("GridAnswer_CA",width = 700, height = 700)
                                ),
                                
                                
@@ -225,7 +227,7 @@ ui <- navbarPage("調査データ簡易集計",
 #                                     #src="./data/CYDER2020_ENQ_20200806.pdf"
 #                                     src="http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf"
 #                         ),
-a(href = "http://133.167.73.14/~kazuo/Bunka_questionnaire_20221212.pdf", "「文化と不平等」調査調査票",target = "_blank"),
+                         a(href = "http://133.167.73.14/~kazuo/BunkaQues.pdf", "「文化と不平等」調査調査票",target = "_blank"),
 
 #                        a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
                         helpText("別TabでPDFが開きます")
@@ -509,8 +511,28 @@ server <- function(input, output, session) {
                                         margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
       
     })
+
+## GridAnswer CA
     
-    # Grid Mosaic 2 LK/DLK
+    output$GridAnswer_CA <- renderPlot({
+      selected_vars <- input$variables 
+      count_categories <- function(x) {
+        table(factor(x, levels = c("++", "+", "-", "--", "DK", "無回答"), exclude = NULL))
+      }
+      
+      # df の 1 列目から 20 列目の各列ごとにカテゴリを集計
+      category_count_tbl <- data_for_plot() %>%
+        dplyr::summarise(across(selected_vars, ~ count_categories(.))) 
+      
+      category_count_tbl %>% as.matrix() -> cat_tbl
+      rownames(cat_tbl) <- c("++","+","-","--","DK","無回答")
+      cat_tbl
+
+　　　res.CA <- FactoMineR::CA(t(cat_tbl))
+
+    })
+      
+# Grid Mosaic 2 LK/DLK
     # 
 　　
         
