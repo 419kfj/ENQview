@@ -60,10 +60,11 @@ Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
 #
 ui <- navbarPage("調査データ簡易集計",
                tabPanel("About",
-                        h1("データを分析する"),
+                        h1("調査データの基本集計ツール"),
                         h2("アプリケーション概要"),
                         p("基本集計、調査票、関連リンク、を掲載"),
-                        helpText("構成上の要望うけつけてます。"),
+                        helpText("機能上の要望あればメールください。"),
+                        p("ver2.0 2024/10/12 「文化と不平等」データを中心に基本集計機能を拡充"),
                         p("ver1.7 2024/10/07 CYDERデータ分析からiwateデータ分析ように修正"),
                         p("ver1.6 2024/01/30 gitでversion管理を開始、NLP2024論文をLINK"),
 　　　　　　　　　　　　p("ver1.5 2023/10/23 クロス集計にgtsummary::tbl_crossを適用"),
@@ -90,7 +91,7 @@ ui <- navbarPage("調査データ簡易集計",
                      "selected_data_for_plot",
                      label = h3("データセットを選択してください。"),
                      choices = c("iwate" = "iwate.f",
-                                 "Bunka"="Bunka"), selected = "iwate"),
+                                 "Bunka"="Bunka"), selected = "Bunka"),
                    selectInput("select_input_data_for_hist",
                                "集計する変数",
                                choices = colnames("selected_data_for_plot"),
@@ -102,10 +103,11 @@ ui <- navbarPage("調査データ簡易集計",
                    selectInput("select_input_data_for_layer",
                                "層化する変数",
                                choices = NULL),
-                   selectInput("variables", "MA変数の選択:", 
-                               choices =  NULL,#colnames(iwate.f),#colnames("selected_data_for_plot"),
+                   selectInput("variables", "服数変数の選択（MAなど）:", 
+                               choices =  NULL,
                                multiple = TRUE,
-                               selectize = FALSE#,
+                               selectize = FALSE,
+                               size = 10
                                #selected =  colnames(iwate.f)[3]
                                ),  # 複数選択を許可
                    #plotOutput("MAplot")
@@ -173,82 +175,6 @@ ui <- navbarPage("調査データ簡易集計",
                    )
               　)
                ),
-               #--------------------------------
-#                tabPanel(
-#                 "基本集計２",
-#                 #                 h1("分析対象df（.rda）をuploadしてください。"),
-#                 h1("MAデータの基本集計を行います。"),
-#                 sidebarPanel(
-#                   selectInput(
-#                     "selected_data_for_plot2",
-#                     label = h3("データセットを選択してください。"),
-#                     choices = c("iwate" = "iwate.f",
-#                                 "Bunka"="Bunka"), selected = "iwate"),
-#                   selectInput("select_input_data_for_hist2",
-#                               "集計する変数",
-#                               choices = colnames("selected_data_for_plot2"),
-#                               #  choices = colnames(iwate.f),
-#                               selected =  colnames(iwate.f)[3]),
-#                   selectInput("select_input_data_for_cross2",
-#                               "クロス集計する変数",
-#                               choices = NULL),
-#                   selectInput("select_input_data_for_layer2",
-#                               "層化する変数",
-#                               choices = NULL),
-#                   selectInput("variables2", "MA変数の選択:",
-#                               choices =  NULL,#colnames(iwate.f),#colnames("selected_data_for_plot"),
-#                               multiple = TRUE,
-#                               selectize = FALSE#,
-#                               #selected =  colnames(iwate.f)[3]
-#                   ),  # 複数選択を許可
-#                   #plotOutput("MAplot")
-#                 ),
-# #------
-# #----　MAIN Panel
-# mainPanel(
-#   tabsetPanel(type = "tabs",
-#               tabPanel("単変数集計",
-#                        h2("基本集計"),
-#                        plotOutput("barchart"),
-#                        DT::dataTableOutput("simple_table"), # server.R も対応させること！
-#               ),
-#               tabPanel("2変数分析",
-#                        h2("クロス集計（gtsummary::tbl_cross）"),
-#                        #  verbatimTextOutput("crosstable"),
-#                        gt_output(outputId = "my_gt_table"),
-#                        plotOutput("crosschart",width = 600, height = 600),
-#                        h3("χ2乗検定"),
-#                        verbatimTextOutput("chisq_test")
-#               ),
-#               tabPanel("2変数分析（層化）",
-#                        h2("クロス集計（gtsummary::tbl_cross）"),
-#                        #  verbatimTextOutput("crosstable"),
-#                        gt_output(outputId = "my_gt_table"),
-#                        plotOutput("crosschart2",width = 600, height = 600),
-#                        h3("χ2乗検定"),
-#                        verbatimTextOutput("chisq_test")
-#               ),
-#               tabPanel("MA plot(Bar)",
-#                        h2("MA変数集計（gtsummary::tbl_cross）"),
-#                        plotOutput("MAplot",width = 600, height = 600)
-#               ),
-# 
-#               tabPanel("MA plot(Dot)",
-#                        h2("MA変数集計（gtsummary::tbl_cross）"),
-#                        plotOutput("MAplot_Dot",width = 600, height = 600)
-#               ),
-#               tabPanel("pairs",
-#                        h2("GGally::pairs"),
-#                        plotOutput("pairs",width = 600, height = 600)
-#               ),
-#               tabPanel("データ一覧",
-#                        h2("データ一覧"),
-#                        DT::dataTableOutput("table_for_plot")
-#               ),
-#               #                               tabPanel("自由記述文分析")
-#   )
-# )
-#                ),
 #-----------------------------------------------------------------------------------------------
                tabPanel("調査票",
 #                         h3("参考資料 PDFはブラウザの設定viewerで開きます"),
@@ -474,8 +400,8 @@ server <- function(input, output, session) {
       selected_vars <- input$variables
       if (length(selected_vars) > 0) {
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
-        gp_vari <- input$select_input_data_for_layer #"最終学歴"
-        df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
+        gp_vari <- input$select_input_data_for_layer # 層化変数
+        data_for_plot() %>% group_by(!!!rlang::syms(gp_vari)) %>% 
           dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
 
         MA_group_tbl %>% select(-度数) %>% 
@@ -491,19 +417,21 @@ server <- function(input, output, session) {
           theme_minimal() +  # 見た目をシンプルに
           scale_color_discrete() +
           #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
-          scale_shape_manual(values = 1:16) 
+          scale_shape_manual(values = 1:length(selected_vars)) 
         }
     })
     
     # 層化MA warp Faset
     
     output$MAplot_lineDotwarp <- renderPlot({
-      selected_vars <- input$variables
+      selected_vars <- input$variables # 選択された変数群
       if (length(selected_vars) > 0) {
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
-        gp_vari <- input$select_input_data_for_layer #"最終学歴"
-        df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
-          dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
+#        browser()
+        gp_vari <- input$select_input_data_for_layer # 層化する変数
+ #       df %>% group_by(!!!rlang::syms(gp_vari)) %>% 
+        data_for_plot() %>% group_by(!!!rlang::syms(gp_vari)) %>% 
+        dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
         
         MA_group_tbl %>% select(-度数) %>% 
           pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
@@ -532,16 +460,13 @@ server <- function(input, output, session) {
     })
     
     
-    ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
-      geom_line() + geom_point() +
-      facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
-      labs(x = "Group", y = "Value") +
-      theme_minimal() + 
-      theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
-    
-    
-    
-    
+    # ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
+    #   geom_line() + geom_point() +
+    #   facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
+    #   labs(x = "Group", y = "Value") +
+    #   theme_minimal() + 
+    #   theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
+
     
 # Grid Mosaic
 # 
@@ -603,10 +528,7 @@ server <- function(input, output, session) {
                                         margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
       
     })
-    
-    
-        
-    
+
     # 度数分布表
     output$simple_table <- DT::renderDataTable({ #renderTable({#
       table(data_for_plot()[,input$select_input_data_for_hist]) -> tmp
