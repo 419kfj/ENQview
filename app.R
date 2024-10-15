@@ -25,6 +25,7 @@ showtext_auto(TRUE)
 # データ読み込みと前処理整形
 
 load("./data/iwate.f.mac.rda")
+load("./data/iwate.f.mac2.rda")
 load("./data/dd3.rda") # .dd3
 load(file="../../RStudio/文化と不平等202409/01.6_Recode/data/d3.rda")
 .dd <- .d3
@@ -104,6 +105,7 @@ ui <- navbarPage("調査データ簡易集計",
                         h2("アプリケーション概要"),
                         p("基本集計、調査票、関連リンク、を掲載"),
                         helpText("機能上の要望あればメールください。"),
+                        p("ver2.1 2024/10/14 変数選択を一元化。Grid集計を汎用化"),
                         p("ver2.0 2024/10/12 「文化と不平等」データを中心に基本集計機能を拡充"),
                         p("ver1.7 2024/10/07 CYDERデータ分析からiwateデータ分析ように修正"),
                         p("ver1.6 2024/01/30 gitでversion管理を開始、NLP2024論文をLINK"),
@@ -131,29 +133,31 @@ ui <- navbarPage("調査データ簡易集計",
                  sidebarPanel(
                    selectInput("selected_data_for_plot",
                      　　　　　label = h3("集計対象を選択してください。"),
-                               choices = c("iwate" = "iwate.f",
+                               choices = c("iwate2" = "iwate.f2",
+                                           "iwate" = "iwate.f",
                                            "Bunka"="Bunka"#,
           #                                 "Bunka"="BunkaRC"
                                            ), selected = "Bunka"),
-                   selectInput("select_input_data_for_hist",
-                               "集計する変数",
-                               choices = colnames("selected_data_for_plot"),
-                              #  choices = colnames(iwate.f),
-                                selected =  colnames(iwate.f)[3]),
+                    selectInput("variables", "変数の複数選択（MAなど）単変数では最初のものだけ:", 
+                                choices =  NULL,
+                                multiple = TRUE,
+                                selectize = FALSE,
+                                size = 7
+                                #selected =  colnames(iwate.f)[3]
+                    ),  # 複数選択を許可
+                    
                    selectInput("select_input_data_for_cross",
                                "クロス集計する変数",
                                choices = NULL),
                    selectInput("select_input_data_for_layer",
                                "層化する変数",
                                choices = NULL),
-                   selectInput("variables", "変数の複数選択（MAなど）:", 
-                               choices =  NULL,
-                               multiple = TRUE,
-                               selectize = FALSE,
-                               size = 10
-                               #selected =  colnames(iwate.f)[3]
-                               ),  # 複数選択を許可
-                   #plotOutput("MAplot")
+                  selectInput("select_input_data_for_hist",
+                              "集計する変数",
+                              choices = colnames("selected_data_for_plot"),
+                              #  choices = colnames(iwate.f),
+                              selected =  colnames(iwate.f)[3]),
+                           #plotOutput("MAplot")
                  ),
                  #----　MAIN Panel
                  mainPanel(
@@ -205,6 +209,11 @@ ui <- navbarPage("調査データ簡易集計",
                                         plotOutput("GridAnswerG_CA",width = 700, height = 700)
                                ),
                                
+                               tabPanel("単変数check",
+                                        h2("棒グラフと度数分布"),
+                                        plotOutput("barchart2"),
+                                        DT::dataTableOutput("simple_table2"), # 
+                               ),
                                
                                
                                tabPanel("Grid回答++/-- mosaic表示",
@@ -238,21 +247,45 @@ ui <- navbarPage("調査データ簡易集計",
 #                                     #src="./data/CYDER2020_ENQ_20200806.pdf"
 #                                     src="http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf"
 #                         ),
-HTML("<ul>"),
-HTML("<li>"),
-                         a(href = "http://133.167.73.14/~kazuo/BunkaQues.pdf", "「文化と不平等」調査調査票",target = "_blank"),
-HTML("</li>"),
-HTML("<li>"),
-                        a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
-HTML("</li>"),
-HTML("</ul>")
+                        HTML("<ul>"),
+                            HTML("<li>"),
+                              a(href = "http://133.167.73.14/~kazuo/BunkaQues.pdf", "「文化と不平等」調査調査票",target = "_blank"),
+                            HTML("</li>"),
+                            HTML("<li>"),
+                              a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
+                            HTML("</li>"),
+                            HTML("<li>"),
+                            　a(href = "http://133.167.73.14/~kazuo/iwate%E5%A4%89%E6%95%B0%E5%AF%BE%E5%BF%9C%E8%A1%A8.pdf", "岩手調査変数対応表",target = "_blank"),
+                            HTML("</li>"),
+                        HTML("</ul>")
 #                        helpText("別TabでPDFが開きます")
                ),
 
-              tabPanel("使い方解説",
-                       a(href = "http://133.167.73.14/~kazuo/Tool_help.pdf", "使い方解説：別タブで開きます",target = "_blank"),
+              tabPanel("使い方解説 【暫定版】",
+                       a(href = "http://133.167.73.14/~kazuo//DataOverviewMan/index.html", "使い方解説：別タブで開きます",target = "_blank"),
                        
-                       helpText("別TabでPDFが開きます")
+                       helpText("quarto Book で書いています")
+              ),
+
+              tabPanel("データアーカイブなど",
+                       HTML("<ul>"),
+                       HTML("<li>"),
+                       a(href = "https://www.e-stat.go.jp/", "e-stat 政府統計の総合窓口",target = "_blank"),
+                       HTML("</li>"),
+                       HTML("<li>"),
+                       a(href = "https://resas.go.jp/", "RESAS 地域経済分析システム",target = "_blank"),
+                       HTML("</li>"),
+                       
+                       HTML("<li>"),
+                       a(href = "https://csrda.iss.u-tokyo.ac.jp/", "SSJDA",target = "_blank"),
+                       HTML("</li>"),
+                       HTML("<li>"),
+                       a(href = "https://jgss.daishodai.ac.jp/", "JGSS",target = "_blank"),
+                       HTML("</li>"),
+                       HTML("<li>"),
+                       a(href = "https://issp.org/", "ISSP",target = "_blank"),
+                       HTML("</li>"),
+                       HTML("</ul>")
               ),
 
 
@@ -328,6 +361,7 @@ server <- function(input, output, session) {
                      "titanic" = data.frame(lapply(data.frame(Titanic), 
                                                    function(i){rep(i, data.frame(Titanic)[, 5])})),
                      "Womenlf" = Womenlf,
+                     "iwate.f2" = iwate.f2[,-c(1,2)],
                      "iwate.f" = iwate.f[,-c(1,2)],
                      "Bunka" = Bunka[,-c(1,2)]
       )
@@ -341,10 +375,18 @@ server <- function(input, output, session) {
       return(data)
     })
     # barplot by ggplot2
-    output$barchart <- renderPlot({
-      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>% 
-        ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1))
+    output$barchart <- renderPlot({            # input$select_input_data_for_hist
+      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>% 
+        ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$variables[1])
     })
+    
+    output$barchart2 <- renderPlot({            
+      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>% 
+        ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$select_input_data_for_hist)
+    })
+    
+    
+    
     # GGally::ggpairs
     output$pairs <- renderPlot({
       data_for_plot()[,c(input$select_input_data_for_hist,input$select_input_data_for_cross)] %>% 
@@ -356,11 +398,11 @@ server <- function(input, output, session) {
     # mosaic plot
     output$crosschart <- renderPlot({
       .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
-                    data_for_plot()[,input$select_input_data_for_hist]) 
+                    data_for_plot()[,input$variables[1]])  #select_input_data_for_hist 
       .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
       tab <- ifelse(.tbl.p < 1, NA, .tbl.p) 
       
-      data_for_plot()[,c(input$select_input_data_for_hist,
+      data_for_plot()[,c(input$variables[1],     #select_input_data_for_hist,
                          input$select_input_data_for_cross)] %>% 
         structable() %>%
         mosaic(shade=TRUE,las=2,
@@ -370,11 +412,11 @@ server <- function(input, output, session) {
     # 層化mosaic　plot  
     output$crosschart2 <- renderPlot({
       .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
-                    data_for_plot()[,input$select_input_data_for_hist]) 
+                    data_for_plot()[,input$variables[1]])  # select_input_data_for_hist 
       .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
       tab <- ifelse(.tbl.p < 1, NA, .tbl.p) 
 
-      data_for_plot()[,c(input$select_input_data_for_hist,
+      data_for_plot()[,c(input$variables[1], #select_input_data_for_hist,
                          input$select_input_data_for_cross,
                          input$select_input_data_for_layer)] %>% 
           structable() %>%
@@ -388,21 +430,25 @@ server <- function(input, output, session) {
     # gtsummary でクロス表表示
     output$my_gt_table <- render_gt(
         data_for_plot() %>% tbl_cross(row = input$select_input_data_for_cross,
-                                      col = input$select_input_data_for_hist,
+                                      col = input$variables[1], #select_input_data_for_hist,
                                       percent = "row") %>% 
           add_p(test="chisq.test") %>% 
           bold_labels() %>% 
           as_gt()
       )
+    
+# chisq.test 
     output$chisq_test <- renderPrint({
-      chisq.test(table(data_for_plot()[,input$select_input_data_for_cross],
-                       data_for_plot()[,input$select_input_data_for_hist]))
+      res.chisq <- chisq.test(table(data_for_plot()[,input$select_input_data_for_cross],
+                       data_for_plot()[,input$variables[1]]))  #select_input_data_for_hist]))
+#browser()
+      print(res.chisq)
     })
     
-    # gtsummay でMA表
+# gtsummay でMA表
     output$MA_gt_table <- render_gt(
       data_for_plot() %>% tbl_cross(row = input$select_input_data_for_cross,
-                                    col = input$select_input_data_for_hist,
+                                    col = input$variables[1],#select_input_data_for_hist,
                                     percent = "row") %>% 
         add_p(test="chisq.test") %>% 
         bold_labels() %>% 
@@ -425,7 +471,6 @@ server <- function(input, output, session) {
                x = "質問項目",
                y = "割合（%）") +
           theme_minimal()
- #       matplot(selected_data, type = "l", lty = 1, col = 1:ncol(selected_data))
       }
     })
     
@@ -523,8 +568,6 @@ server <- function(input, output, session) {
       rownames(cat_tbl) <- c("++","+","-","--","DK","無回答")
       cat_tbl
   
-#      data_tbl <- Grid_table()
-#      cat_tbl <- data_tbl          
       rownames(t(cat_tbl)) -> rnames
       t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>% 
         mutate(Like=`++`+`+`) %>% 
@@ -655,21 +698,6 @@ server <- function(input, output, session) {
     
     # GridAnswerG CA
     output$GridAnswerG_CA <- renderPlot({
-      # grid_ptn <- c("A","B","C","D","E","NA") # 仮のパターン
-      # selected_vars <- input$variables 
-      # count_categories <- function(x) {
-      #   table(factor(x, levels = grid_ptn,#c("++", "+", "-", "--", "DK", "無回答"), 
-      #                exclude = NULL))
-      # }
-      # 
-      # # df の 1 列目から 20 列目の各列ごとにカテゴリを集計
-      # category_count_tbl <- data_for_plot() %>%
-      #   dplyr::summarise(across(selected_vars, ~ count_categories(.))) 
-      # 
-      # category_count_tbl %>% as.matrix() -> cat_tbl
-      # rownames(cat_tbl) <- grid_ptn #c("++","+","-","--","DK","無回答")
-      # cat_tbl
-
       selected_vars <- input$variables
       #browser()
       vectors <- map(selected_vars, ~ {
@@ -692,7 +720,6 @@ server <- function(input, output, session) {
       rownames(cat_tbl) <- union_all #grid_ptn 
       cat_tbl
       
-            
       res.CA <- FactoMineR::CA(t(cat_tbl))
       
     })
@@ -707,11 +734,18 @@ server <- function(input, output, session) {
 
 # 度数分布表
     output$simple_table <- DT::renderDataTable({ #renderTable({#
+      table(data_for_plot()[,input$variables[1]]) -> tmp #select_input_data_for_hist]) -> tmp
+      round(100*prop.table(tmp),1) -> tmp2
+      data.frame(tmp,rate=tmp2)[,c(1,2,4)]
+    })   
+
+    output$simple_table2 <- DT::renderDataTable({ #renderTable({#
       table(data_for_plot()[,input$select_input_data_for_hist]) -> tmp
       round(100*prop.table(tmp),1) -> tmp2
       data.frame(tmp,rate=tmp2)[,c(1,2,4)]
     })   
     
+
     output$table_for_plot <- DT::renderDataTable({
       data_for_plot()
     })
