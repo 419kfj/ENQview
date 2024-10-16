@@ -20,6 +20,8 @@ library(gtsummary)
 library(gt)
 library(showtext)
 showtext_auto(TRUE)
+#library(tidyverse)
+#library(shiny)
 
 #-------------------------------------------------------------------------------
 # データ読み込みと前処理整形
@@ -27,8 +29,11 @@ showtext_auto(TRUE)
 load("./data/iwate.f.mac.rda")
 load("./data/iwate.f.mac2.rda")
 load("./data/dd3.rda") # .dd3
+load("./data/Bunka2.rda") # Bunka2  変数名を記号＋日本語の構成にした 2024/10/16
+Bunka3 <- Bunka2
 load(file="../../RStudio/文化と不平等202409/01.6_Recode/data/d3.rda")
 .dd <- .d3
+#Bunka2 <- Bunka2 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
 Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
 #Bunka <- .d3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
   mutate(across(c(10:21, #Q2
@@ -62,8 +67,41 @@ Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
   )
 
 # recodeしたあとの.ddは、まだ、変数名に短縮をいれてない。
-Bunka2 <- .dd %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+
+Bunka3 <- Bunka3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+  #Bunka2 <- Bunka2 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
   mutate(across(c(10:21, #Q2
+                  43:47,#Q4
+                  74:89,#Q7
+                  193:204,#Q14
+                  258:277,#Q36
+                  278:293, #Q37
+                  297:303 #Q41
+                  ), 
+                  ~ case_when(
+                    . == "On"  ~ 1,
+                    . == "Off" ~ 0,
+                    TRUE ~ NA_real_)
+                  )
+                ) %>% 
+  mutate(across(c(107:139,#Q9
+                  120:137,#Q10
+                  138:159,#Q11
+                  ),
+                ~ case_when(
+                  . == "好みである" ~ "A",
+                  . == "好みでない" ~ "B",
+                  . == "見たことがあるが、どちらでもない" ~ "C",
+                  . == "タイトルは知っているが、見たことがない" ~ "D",
+                  . == "知らない" ~ "E",
+                  )
+                )
+         )
+
+
+Bunka2 <- .dd %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+#Bunka2 <- Bunka2 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
+     mutate(across(c(10:21, #Q2
                   43:47,#Q4
                   74:89,#Q7
                   193:204,#Q14
@@ -92,8 +130,6 @@ Bunka2 <- .dd %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
   )
   )
   )
-
-
 
 
 #-------------------------------------------------------------------------------
@@ -135,8 +171,8 @@ ui <- navbarPage("調査データ簡易集計",
                      　　　　　label = h3("集計対象を選択してください。"),
                                choices = c("iwate2" = "iwate.f2",
                                            "iwate" = "iwate.f",
-                                           "Bunka"="Bunka"#,
-          #                                 "Bunka"="BunkaRC"
+                                           "Bunka"="Bunka",
+                                           "Bunka3"="Bunka3"
                                            ), selected = "Bunka"),
                     selectInput("variables", "変数の複数選択（MAなど）単変数では最初のものだけ:", 
                                 choices =  NULL,
@@ -179,6 +215,12 @@ ui <- navbarPage("調査データ簡易集計",
                                         h2("GGally::pairs"),
                                         plotOutput("pairs",width = 600, height = 600)
                                ),
+                               tabPanel("pairs_multi",
+                                        h2("GGally::pairs 多変数"),
+                                        plotOutput("pairs_multi",width = 900, height = 900)
+                               ),
+                               
+                               
                                tabPanel("2変数分析（層化）",
                                         h2("クロス集計（gtsummary::tbl_cross）"),
                                         #  verbatimTextOutput("crosstable"),
@@ -216,21 +258,21 @@ ui <- navbarPage("調査データ簡易集計",
                                ),
                                
                                
-                               tabPanel("Grid回答++/-- mosaic表示",
-                                        h2("Grid回答mosaic表示"),
-                                        plotOutput("GridAnswer_mosaic",width = 600, height = 600),
-                                        plotOutput("GridAnswer_CA",width = 700, height = 700)
-                               ),
-                               
-                               
-                               tabPanel("Grid回答 LK/DLK mosaic表示",
-                                        h2("Grid回答mosaic表示"),
-                                        plotOutput("GridAnswer2_mosaic",width = 600, height = 600),
-                                        plotOutput("GridAnswer2_CA",width = 700, height = 700)
-                               ),
+                               # tabPanel("Grid回答++/-- mosaic表示",
+                               #          h2("Grid回答mosaic表示"),
+                               #          plotOutput("GridAnswer_mosaic",width = 600, height = 600),
+                               #          plotOutput("GridAnswer_CA",width = 700, height = 700)
+                               # ),
+                               # 
+                               # 
+                               # tabPanel("Grid回答 LK/DLK mosaic表示",
+                               #          h2("Grid回答mosaic表示"),
+                               #          plotOutput("GridAnswer2_mosaic",width = 600, height = 600),
+                               #          plotOutput("GridAnswer2_CA",width = 700, height = 700)
+                               # ),
                                
                             
-                               tabPanel("データ一覧",
+                               tabPanel("選択変数のデータ一覧",
                                         h2("データ一覧"),
                                         DT::dataTableOutput("table_for_plot")
                                ),
@@ -363,8 +405,9 @@ server <- function(input, output, session) {
                      "Womenlf" = Womenlf,
                      "iwate.f2" = iwate.f2[,-c(1,2)],
                      "iwate.f" = iwate.f[,-c(1,2)],
-                     "Bunka" = Bunka[,-c(1,2)]
-      )
+                     "Bunka" = Bunka[,-c(1,2)],
+                     "Bunka3" = Bunka3[,]
+                     )
       updateSelectInput(session, "select_input_data_for_hist", choices = colnames(data))
       updateSelectInput(session, "select_input_data_for_cross", choices = c(" ",colnames(data)))
       updateSelectInput(session, "select_input_data_for_layer", choices = c(" ",colnames(data)))
@@ -381,7 +424,7 @@ server <- function(input, output, session) {
     })
     
     output$barchart2 <- renderPlot({            
-      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>% 
+      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>% 
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$select_input_data_for_hist)
     })
     
@@ -389,12 +432,23 @@ server <- function(input, output, session) {
     
     # GGally::ggpairs
     output$pairs <- renderPlot({
-      data_for_plot()[,c(input$select_input_data_for_hist,input$select_input_data_for_cross)] %>% 
-        ggpairs(mapping = aes(color = !!as.name(input$select_input_data_for_hist))) +
+      data_for_plot()[,c(input$variables[1],input$select_input_data_for_cross)] %>% 
+        ggpairs(mapping = aes(color = !!as.name(input$variables[1]))) +
         theme(axis.text.x = element_text(angle=45,hjust = 1)) + 
-        ggtitle(input$select_input_data_for_hist) -> p
+        ggtitle(input$variables[1]) -> p
       p
     })  
+    
+    output$pairs_multi<- renderPlot({
+      data_for_plot()[,input$variables] %>% 
+        ggpairs(mapping = aes(color = !!as.name(input$variables))) +
+        theme(axis.text.x = element_text(angle=45,hjust = 1)) + 
+        ggtitle(input$variables) -> p
+      p
+    })  
+    
+    
+    
     # mosaic plot
     output$crosschart <- renderPlot({
       .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
@@ -747,7 +801,7 @@ server <- function(input, output, session) {
     
 
     output$table_for_plot <- DT::renderDataTable({
-      data_for_plot()
+      data_for_plot() %>% select(input$variables)
     })
   }
 
