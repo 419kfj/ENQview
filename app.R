@@ -18,6 +18,7 @@ library(GGally)
 library(DT)
 library(gtsummary)
 library(gt)
+library(readxl)
 library(showtext)
 showtext_auto(TRUE)
 #library(tidyverse)
@@ -33,6 +34,23 @@ load("./data/Bunka2.rda") # Bunka2  変数名を記号＋日本語の構成に�
 Bunka3 <- Bunka2
 load(file="../../RStudio/文化と不平等202409/01.6_Recode/data/d3.rda")
 .dd <- .d3
+
+# #------- 2024/10/17 追加
+# # 記号付きshortnameをつけて、.dd2とする
+# 
+# #short_vnames
+# 
+# load("./data/short_vnames.rda")
+# conv_tables　<- read_excel("./data/Name_and_Label2.xlsx") # 変数名（Qnn）とラベルの対応表
+# 
+# conv_tables %>% select(Name,短縮A) %>% transmute(sname2=str_c(Name, 短縮A)) %>%
+#    unlist %>% setNames(NULL) -> short_vnames2
+# 
+# #short_vnames2
+# convNamesVec <- setNames(1:314,short_vnames2[-c(1:2)])
+#  .dd %>% select(-c(1:2)) %>% rename(!!!convNamesVec) -> .dd3
+#-------
+
 #Bunka2 <- Bunka2 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
 Bunka <- .dd3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
 #Bunka <- .d3 %>% as.data.frame() %>% # MA回答のOn/Offを1/0に変換
