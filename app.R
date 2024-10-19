@@ -32,7 +32,8 @@ load("./data/iwate.f.mac2.rda")
 load("./data/dd3.rda") # .dd3
 load("./data/Bunka2.rda") # Bunka2  変数名を記号＋日本語の構成にした 2024/10/16
 Bunka3 <- Bunka2
-load(file="../../RStudio/文化と不平等202409/01.6_Recode/data/d3.rda")
+#load(file="../../RStudio/文化と不平等202409/01.6_Recode/data/d3.rda")
+load(file="./data/d3.rda")
 .dd <- .d3
 
 # #------- 2024/10/17 追加
