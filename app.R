@@ -21,8 +21,6 @@ library(gt)
 library(readxl)
 library(showtext)
 showtext_auto(TRUE)
-#library(tidyverse)
-#library(shiny)
 
 #-------------------------------------------------------------------------------
 # データ読み込みと前処理整形
