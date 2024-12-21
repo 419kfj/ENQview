@@ -35,34 +35,34 @@ source("./R/data_preset.R")
 # Define UI for application
 #
 ui <- navbarPage("調査データ簡易集計",
-               tabPanel("About",
-                        h1("調査データの基本集計ツール"),
-                        h2("アプリケーション概要"),
-                        p("基本集計、調査票、関連リンク、を掲載"),
-                        helpText("機能上の要望あればメールください。"),
-
-                        p("ver3.0 2024/12/19 ENQview としてパッケージ化"),
-                        p("ver2.1.1 2024/11/20 ISSP2016データを追加"),
-                        p("ver2.1 2024/10/14 変数選択を一元化。Grid集計を汎用化"),
-                        p("ver2.0 2024/10/12 「文化と不平等」データを中心に基本集計機能を拡充"),
-                        p("ver1.7 2024/10/07 CYDERデータ分析からiwateデータ分析ように修正"),
-                        p("ver1.6 2024/01/30 gitでversion管理を開始、NLP2024論文をLINK"),
-　　　　　　　　　　　　p("ver1.5 2023/10/23 クロス集計にgtsummary::tbl_crossを適用"),
-                        p("ver1.0 2023/06/12 プロトタイプから利用可能なレベルにしてリリース"),
-                        HTML("<ul>"),
-                        HTML("<li>"),
-                        a(href = "https://mastering-shiny.org/", target="_blank", "Mastering Shiny"),
-                        HTML("</li>"),
-                        HTML("<li>"),
-                        a(href = "https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html",target="_blank", "gtsummaryの使い方"),
-                        HTML("</li>"),
-                        HTML("<li>"),
-                        a(href = "https://www.danieldsjoberg.com/gtsummary/articles/shiny.html",target="_blank", "Shinyの中でgtsummaryを使う"),
-                        HTML("</li>"),
-                        HTML("<ul>"),
-　　　　　　　　　　　　h3("app.R 最終更新日時:"),
-　　　　　　　　　　　　textOutput("timestamp")  # タイムスタンプの表示
-               ),
+#                tabPanel("About",
+#                         h1("調査データの基本集計ツール"),
+#                         h2("アプリケーション概要"),
+#                         p("基本集計、調査票、関連リンク、を掲載"),
+#                         helpText("機能上の要望あればメールください。"),
+#
+#                         p("ver3.0 2024/12/19 ENQview としてパッケージ化"),
+#                         p("ver2.1.1 2024/11/20 ISSP2016データを追加"),
+#                         p("ver2.1 2024/10/14 変数選択を一元化。Grid集計を汎用化"),
+#                         p("ver2.0 2024/10/12 「文化と不平等」データを中心に基本集計機能を拡充"),
+#                         p("ver1.7 2024/10/07 CYDERデータ分析からiwateデータ分析ように修正"),
+#                         p("ver1.6 2024/01/30 gitでversion管理を開始、NLP2024論文をLINK"),
+# 　　　　　　　　　　　　p("ver1.5 2023/10/23 クロス集計にgtsummary::tbl_crossを適用"),
+#                         p("ver1.0 2023/06/12 プロトタイプから利用可能なレベルにしてリリース"),
+#                         HTML("<ul>"),
+#                         HTML("<li>"),
+#                         a(href = "https://mastering-shiny.org/", target="_blank", "Mastering Shiny"),
+#                         HTML("</li>"),
+#                         HTML("<li>"),
+#                         a(href = "https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html",target="_blank", "gtsummaryの使い方"),
+#                         HTML("</li>"),
+#                         HTML("<li>"),
+#                         a(href = "https://www.danieldsjoberg.com/gtsummary/articles/shiny.html",target="_blank", "Shinyの中でgtsummaryを使う"),
+#                         HTML("</li>"),
+#                         HTML("<ul>"),
+# 　　　　　　　　　　　　h3("app.R 最終更新日時:"),
+# 　　　　　　　　　　　　textOutput("timestamp")  # タイムスタンプの表示
+#                ),
                #--------------------------------
                tabPanel(
                  "基本集計",
@@ -160,140 +160,13 @@ ui <- navbarPage("調査データ簡易集計",
                                         plotOutput("barchart2"),
                                         DT::dataTableOutput("simple_table2"), #
                                ),
-
-
-                               # tabPanel("Grid回答++/-- mosaic表示",
-                               #          h2("Grid回答mosaic表示"),
-                               #          plotOutput("GridAnswer_mosaic",width = 600, height = 600),
-                               #          plotOutput("GridAnswer_CA",width = 700, height = 700)
-                               # ),
-                               #
-                               #
-                               # tabPanel("Grid回答 LK/DLK mosaic表示",
-                               #          h2("Grid回答mosaic表示"),
-                               #          plotOutput("GridAnswer2_mosaic",width = 600, height = 600),
-                               #          plotOutput("GridAnswer2_CA",width = 700, height = 700)
-                               # ),
-
-
                                tabPanel("選択変数のデータ一覧",
                                         h2("データ一覧"),
                                         DT::dataTableOutput("table_for_plot")
                                ),
-#                               tabPanel("自由記述文分析")
                    )
               　)
                ),
-#-----------------------------------------------------------------------------------------------
-               tabPanel("調査票",
-#                         h3("参考資料 PDFはブラウザの設定viewerで開きます"),
-# #                       tags$a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "PDFを開く", target = "_blank"),
-#                         tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-#                                     #src="./CYDER_ENQ3/data/CYDER2020_ENQ_20200806.pdf"
-#                                     #src="./data/CYDER2020_ENQ_20200806.pdf"
-#                                     src="http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf"
-#                         ),
-                        HTML("<ul>"),
-                            HTML("<li>"),
-                              a(href = "http://133.167.73.14/~kazuo/BunkaQues.pdf", "「文化と不平等」調査調査票",target = "_blank"),
-                            HTML("</li>"),
-                            HTML("<li>"),
-                              a(href = "http://133.167.73.14/~kazuo/ruda0010-questionnaire.pdf", "岩手調査調査票",target = "_blank"),
-                            HTML("</li>"),
-                            HTML("<li>"),
-                            　a(href = "http://133.167.73.14/~kazuo/iwate%E5%A4%89%E6%95%B0%E5%AF%BE%E5%BF%9C%E8%A1%A8.pdf", "岩手調査変数対応表",target = "_blank"),
-                            HTML("</li>"),
-                            HTML("<li>"),
-                            a(href = "http://133.167.73.14/~kazuo/ISSP2016_ZA6900_q_jp.pdf", "ISSP2016_JP 調査票",target = "_blank"),
-                            HTML("</li>"),
-                            HTML("<li>"),
-                            a(href = "http://133.167.73.14/~kazuo/ZA6900_cdb.pdf", "ISSP2016コードブック",target = "_blank"),
-                            HTML("</li>"),
-                        HTML("</ul>")
-#                        helpText("別TabでPDFが開きます")
-               ),
-
-              tabPanel("使い方解説 【暫定版】",
-                       a(href = "http://133.167.73.14/~kazuo//DataOverviewMan/index.html", "使い方解説：別タブで開きます",target = "_blank"),
-
-                       helpText("quarto Book で書いています")
-              ),
-
-              tabPanel("データアーカイブなど",
-                       HTML("<ul>"),
-                       HTML("<li>"),
-                       a(href = "https://www.e-stat.go.jp/", "e-stat 政府統計の総合窓口",target = "_blank"),
-                       HTML("</li>"),
-                       HTML("<li>"),
-                       a(href = "https://resas.go.jp/", "RESAS 地域経済分析システム",target = "_blank"),
-                       HTML("</li>"),
-
-                       HTML("<li>"),
-                       a(href = "https://csrda.iss.u-tokyo.ac.jp/", "SSJDA",target = "_blank"),
-                       HTML("</li>"),
-                       HTML("<li>"),
-                       a(href = "https://jgss.daishodai.ac.jp/", "JGSS",target = "_blank"),
-                       HTML("</li>"),
-                       HTML("<li>"),
-                       a(href = "https://issp.org/", "ISSP",target = "_blank"),
-                       HTML("</li>"),
-                       HTML("</ul>")
-              ),
-
-
-               tabPanel("関連リンク集",
-                        HTML("<ul>"),
-                        HTML("<li>"),
-                        a(href = "https://www.anlp.jp/nlp2024/", "NLP2024大会リンク"),
-                        HTML("</li>"),
-                        HTML("<li>"),
-                        a(href = "https://www.anlp.jp/nlp2023/", "NLP2023大会リンク"),
-                        HTML("</li>"),
-                        HTML("<li>"),
-                        　　　a(href = "https://419kfj.sakura.ne.jp/db/nlp2023-fujimoto-ohata/", "NLP2023 パネル発表補足リンク"),
-                        HTML("</li>"),
-                        HTML("</ul>")
-               ),
-               navbarMenu("言語処理学会関係",
-                          tabPanel(title = "NLP2024発表論文", value = 4,
-                                   tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                               src="NLP2024_20240112_v1.2.pdf" #PDFファイルは、www フォルダに格納
-                                   )
-                          ),
-                          tabPanel(title = "NLP2023発表論文", value = 4,
-                                   tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                               src="https://www.anlp.jp/proceedings/annual_meeting/2023/pdf_dir/Q1-11.pdf"
-                                   )
-                          ),
-                          tabPanel(title = "NLP2023発表パネル", value = 4,
-                                   tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                               src="https://419kfj.sakura.ne.jp/db/wp-content/uploads/2023/04/NLP2023_03091057.pdf"
-                                   )
-                          ),
-                          tabPanel("NLP2023発表補足スライド",value = 4,
-                                   tags$iframe(style="height:800px; width:100%; scrolling=yes", #400px
-                                               src="https://419kfj.sakura.ne.jp/db/wp-content/uploads/2023/03/NLP2023SupGraphv1.2.pdf"
-                                   )
-                          ),
-                          tabPanel("ソースコード",
-                                   h2("スミマセン、まだ工事中です。"),
-                                   sidebarPanel(),
-                                   mainPanel(
-                                     img(src="job_kouji_ojigi.png", height = 500, width = 300) # www フォルダに格納
-                                   )
-                          )
-               ),# navbarMenu close
-　　　　　　　navbarMenu("日本社会学会関係",
-　　　　　　　　　　　　  tabPanel(title = "2024-97回全国大会 11/9−10",  value = 4,
-　　　　　　　　　　　　　　　　　 tags$iframe(style = "height:800px; width:100%; scrolling=yes", #400px
-              　　　　　　　　　　 src = "https://jss-sociology.org/meeting/20231120post-15476/"
-              　　　　　　　　　　 )),
-                          tabPanel(title = "2023-96回全国大会",value = 4,
-                                   tags$iframe(style = "height:800px; width:100%; scrolling=yes", #400px
-                                   src = "https://jss-sociology.org/meeting_archives/20221226post-13972/"
-                                   )),
-
-                 )# navbarMenu close
 )　# ui navbarPage close
 
 #-------------------------------------------------------------------------------
@@ -456,26 +329,6 @@ server <- function(input, output, session) {
           theme_minimal()
       }
     })
-
-    # # MAplot Cleverland Dot Plot(No sorting)　これだと、調査票の順に表示させるのが難しいので、barplotでやる。
-    # output$MAplot <- renderPlot({
-    #   selected_vars <- input$variables  # 選択された変数を取得
-    #   if (length(selected_vars) > 0) {
-    #     # 選択された変数を用いてプロット
-    #     selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
-    #     selected_data %>% dplyr::summarise(across(everything(), ~ mean(. == 1,na.rm =TRUE))) %>%
-    #       pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
-    #     ratio_df %>% ggplot(aes(x=Ratio, y=(Question))) + #y=reorder(Question,Ratio))) +
-    #       geom_point(size=3) + #scale_y_reverse() +
-    #       theme_bw() +
-    #       theme(panel.grid.major.x = element_blank(),
-    #             panel.grid.minor.x = element_blank(),
-    #             panel.grid.major.y = element_line(colour="grey60",linetype="dashed")) +
-    #       labs(title = selected_vars,
-    #            x = "割合（%）",y = "質問項目")
-    #   }
-    # })
-
 
     # MAplot Cleverland Dot Plot
 
