@@ -8,6 +8,7 @@
 #
 
 # 履歴
+# 2024/12/21 function化作業開始
 # 2024/01/30 gitでの管理を開始
 
 ENQview <- function(...){
