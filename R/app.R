@@ -8,6 +8,7 @@
 #
 
 # 履歴
+# 2024/12/22 function化、パッケージ化、一段落
 # 2024/12/21 function化作業開始
 # 2024/01/30 gitでの管理を開始
 
@@ -31,31 +32,6 @@ showtext_auto(TRUE)
 ##ui <- navbarPage("調査データ簡易集計",
 ui <- fluidPage("調査データ簡易集計",
 #                tabPanel("About",
-#                         h1("調査データの基本集計ツール"),
-#                         h2("アプリケーション概要"),
-#                         p("基本集計、調査票、関連リンク、を掲載"),
-#                         helpText("機能上の要望あればメールください。"),
-#
-#                         p("ver3.0 2024/12/19 ENQview としてパッケージ化"),
-#                         p("ver2.1.1 2024/11/20 ISSP2016データを追加"),
-#                         p("ver2.1 2024/10/14 変数選択を一元化。Grid集計を汎用化"),
-#                         p("ver2.0 2024/10/12 「文化と不平等」データを中心に基本集計機能を拡充"),
-#                         p("ver1.7 2024/10/07 CYDERデータ分析からiwateデータ分析ように修正"),
-#                         p("ver1.6 2024/01/30 gitでversion管理を開始、NLP2024論文をLINK"),
-# 　　　　　　　　　　　　p("ver1.5 2023/10/23 クロス集計にgtsummary::tbl_crossを適用"),
-#                         p("ver1.0 2023/06/12 プロトタイプから利用可能なレベルにしてリリース"),
-#                         HTML("<ul>"),
-#                         HTML("<li>"),
-#                         a(href = "https://mastering-shiny.org/", target="_blank", "Mastering Shiny"),
-#                         HTML("</li>"),
-#                         HTML("<li>"),
-#                         a(href = "https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html",target="_blank", "gtsummaryの使い方"),
-#                         HTML("</li>"),
-#                         HTML("<li>"),
-#                         a(href = "https://www.danieldsjoberg.com/gtsummary/articles/shiny.html",target="_blank", "Shinyの中でgtsummaryを使う"),
-#                         HTML("</li>"),
-#                         HTML("<ul>"),
-# 　　　　　　　　　　　　h3("app.R 最終更新日時:"),
 # 　　　　　　　　　　　　textOutput("timestamp")  # タイムスタンプの表示
 #                ),
                #--------------------------------
@@ -63,18 +39,7 @@ ui <- fluidPage("調査データ簡易集計",
                  "基本集計",
                  h1("基本集計を行います。"),
                  sidebarPanel(
-#                    selectInput("selected_data_for_plot",
-#                      　　　　　label = h3("集計対象を選択してください。"),
-#                                choices = c("iwate2" = "iwate.f2",
-#                                            "iwate" = "iwate.f",
-#                                            "Bunka"="Bunka",
-#                                            "Bunka3"="Bunka3",
-#                                            "東大朝日2020a" = "UTAS2020_a",
-#                                            "ISSP2016" = "issp2016"
-# #                                           ), selected = "Bunka"),
-#                                ), selected = data.df),
-
-                    selectInput(
+                 selectInput(
                       inputId = "selected_data_for_plot",
                       label = h3("集計対象はこれです："),
                       choices = "data.df",
@@ -87,7 +52,6 @@ ui <- fluidPage("調査データ簡易集計",
                                 multiple = TRUE,
                                 selectize = FALSE,
                                 size = 7
-                                #selected =  colnames(iwate.f)[3]
                     ),  # 複数選択を許可
 
                    selectInput("select_input_data_for_cross",
@@ -99,9 +63,7 @@ ui <- fluidPage("調査データ簡易集計",
                   selectInput("select_input_data_for_hist",
                               "集計する変数",
                               choices = colnames("selected_data_for_plot"),
-                              #  choices = colnames(iwate.f),
                               selected =  colnames(data.df)[3]),
-                           #plotOutput("MAplot")
                  ),
                  #----　MAIN Panel
                  mainPanel(
@@ -171,7 +133,7 @@ ui <- fluidPage("調査データ簡易集計",
                    )
               　)
                ),
-)　# ui navbarPage close
+)　
 
 #-------------------------------------------------------------------------------
 # Define server logic required to draw outlut tables and graphs
@@ -212,7 +174,7 @@ server <- function(input, output, session) {
                         selected = colnames(data)[3:4])
       return(data)
     })
-    # barplot by ggplot2
+  # barplot by ggplot2
     output$barchart <- renderPlot({            # input$select_input_data_for_hist
       data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$variables[1])
@@ -241,8 +203,6 @@ server <- function(input, output, session) {
         ggtitle(input$variables) -> p
       p
     })
-
-
 
     # mosaic plot
     output$crosschart <- renderPlot({
@@ -392,9 +352,8 @@ server <- function(input, output, session) {
       selected_vars <- input$variables # 選択された変数群
       if (length(selected_vars) > 0) {
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
-#        browser()
+
         gp_vari <- input$select_input_data_for_layer # 層化する変数
- #       df %>% group_by(!!!rlang::syms(gp_vari)) %>%
         data_for_plot() %>% group_by(!!!rlang::syms(gp_vari)) %>%
         dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
 
