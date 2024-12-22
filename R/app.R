@@ -11,7 +11,7 @@
 # 2024/12/21 function化作業開始
 # 2024/01/30 gitでの管理を開始
 
-ENQview <- function(data.df,...){
+ENQview <- function(data.df=Bunka2,...){
 
 library(shiny)
 library(FactoMineR)
@@ -24,12 +24,6 @@ library(gt)
 library(readxl)
 library(showtext)
 showtext_auto(TRUE)
-
-#-------------------------------------------------------------------------------
-# データ読み込みと前処理整形
-
-#source("./R/data_preset.R")
-
 
 #-------------------------------------------------------------------------------
 # Define UI for application
@@ -106,7 +100,7 @@ ui <- fluidPage("調査データ簡易集計",
                               "集計する変数",
                               choices = colnames("selected_data_for_plot"),
                               #  choices = colnames(iwate.f),
-                              selected =  colnames(iwate.f)[3]),
+                              selected =  colnames(data.df)[3]),
                            #plotOutput("MAplot")
                  ),
                  #----　MAIN Panel
@@ -183,7 +177,7 @@ ui <- fluidPage("調査データ簡易集計",
 # Define server logic required to draw outlut tables and graphs
 #
 server <- function(input, output, session) {
-    addResourcePath("data", "data")
+#    addResourcePath("data", "data")
     output$distPlot_shiny <- renderPlot({
       x    <- faithful[, 2]
       bins <- seq(min(x), max(x), length.out = input$bins_shiny + 1)
