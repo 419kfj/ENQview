@@ -11,7 +11,7 @@
 # 2024/12/21 function化作業開始
 # 2024/01/30 gitでの管理を開始
 
-ENQview <- function(...){
+ENQview <- function(data.df,...){
 
 library(shiny)
 library(FactoMineR)
@@ -28,13 +28,14 @@ showtext_auto(TRUE)
 #-------------------------------------------------------------------------------
 # データ読み込みと前処理整形
 
-source("./R/data_preset.R")
+#source("./R/data_preset.R")
 
 
 #-------------------------------------------------------------------------------
 # Define UI for application
 #
-ui <- navbarPage("調査データ簡易集計",
+##ui <- navbarPage("調査データ簡易集計",
+ui <- fluidPage("調査データ簡易集計",
 #                tabPanel("About",
 #                         h1("調査データの基本集計ツール"),
 #                         h2("アプリケーション概要"),
@@ -66,18 +67,27 @@ ui <- navbarPage("調査データ簡易集計",
                #--------------------------------
                tabPanel(
                  "基本集計",
-#                 h1("分析対象df（.rda）をuploadしてください。"),
                  h1("基本集計を行います。"),
                  sidebarPanel(
-                   selectInput("selected_data_for_plot",
-                     　　　　　label = h3("集計対象を選択してください。"),
-                               choices = c("iwate2" = "iwate.f2",
-                                           "iwate" = "iwate.f",
-                                           "Bunka"="Bunka",
-                                           "Bunka3"="Bunka3",
-                                           "東大朝日2020a" = "UTAS2020_a",
-                                           "ISSP2016" = "issp2016"
-                                           ), selected = "Bunka"),
+#                    selectInput("selected_data_for_plot",
+#                      　　　　　label = h3("集計対象を選択してください。"),
+#                                choices = c("iwate2" = "iwate.f2",
+#                                            "iwate" = "iwate.f",
+#                                            "Bunka"="Bunka",
+#                                            "Bunka3"="Bunka3",
+#                                            "東大朝日2020a" = "UTAS2020_a",
+#                                            "ISSP2016" = "issp2016"
+# #                                           ), selected = "Bunka"),
+#                                ), selected = data.df),
+
+                    selectInput(
+                      inputId = "selected_data_for_plot",
+                      label = h3("集計対象はこれです："),
+                      choices = "data.df",
+                      selected = "data.df" # デフォルトで最初の列を選択
+#                    )
+                 ),
+
                     selectInput("variables", "変数の複数選択（MAなど）単変数では最初のものだけ:",
                                 choices =  NULL,
                                 multiple = TRUE,
@@ -180,8 +190,14 @@ server <- function(input, output, session) {
       hist(x, breaks = bins, col = 'darkgray', border = 'white')
     })
 
+    # data_for_plot <- reactive({
+    #   data.df
+    # })
+
+
     data_for_plot <- reactive({
       data <- switch(input$selected_data_for_plot,
+                     "data.df" = data.df,
                      "iris" = iris,
                      "titanic" = data.frame(lapply(data.frame(Titanic),
                                                    function(i){rep(i, data.frame(Titanic)[, 5])})),
