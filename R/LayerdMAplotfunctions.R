@@ -63,7 +63,7 @@ make_grouped_MA_tbl2 <- function(df,selected_vars,layer_val,...){
 # グラフ描画用function
 ## 層化MAplot（Dot plot）
 
-LayeredMAplot <- function(MA_group_tbl,layer_val,...){
+LayeredMAplot <- function(MA_group_tbl,layer_val,selected_vars){
   MA_group_tbl %>% select(-度数) %>%
     pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
                  names_to = "variable",         # 変数名の列を"variable"として格納
