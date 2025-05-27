@@ -13,6 +13,7 @@
 # 2024/01/30 gitでの管理を開始
 
 ENQview <- function(data.df=Bunka2,...){
+#ENQview <- function(data.df=cyder2024a.all.df,...){
 
 library(shiny)
 library(FactoMineR)
@@ -176,12 +177,16 @@ server <- function(input, output, session) {
     })
   # barplot by ggplot2
     output$barchart <- renderPlot({            # input$select_input_data_for_hist
-      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>%
+      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>%
+#        mutate(rate=100 * n/sum(n)) %>%
+        mutate(rate=100 * as.numeric(n)/sum(as.numeric(n))) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$variables[1])
     })
 
     output$barchart2 <- renderPlot({
-      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>% mutate(rate=100*n/sum(n)) %>%
+      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>%
+#        mutate(rate=100* n/ sum(n)) %>%
+        mutate(rate=100* as.numeric(n)/ sum(as.numeric(n))) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$select_input_data_for_hist)
     })
 
@@ -206,9 +211,14 @@ server <- function(input, output, session) {
 
     # mosaic plot
     output$crosschart <- renderPlot({
-      .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
-                    data_for_plot()[,input$variables[1]])  #select_input_data_for_hist
-      .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
+#      .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
+#                    data_for_plot()[,input$variables[1]])  #select_input_data_for_hist
+
+      .tbl <- table(data_for_plot()[[input$select_input_data_for_cross]],
+                    data_for_plot()[[input$variables[1]]])  #select_input_data_for_hist
+
+
+            .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
       tab <- ifelse(.tbl.p < 1, NA, .tbl.p)
 
       data_for_plot()[,c(input$variables[1],     #select_input_data_for_hist,
