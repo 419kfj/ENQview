@@ -17,10 +17,10 @@ devtools::install_github("419kfj/ENQview", upgrade="never")
 library(ENQview)
 
 ## データを使えるようにする。
-
-load("ENQview_data/Bunka2")
-ENQview(Bunka2)
-
+```r
+load("ENQview_data/df")
+ENQview(df)
+```
 
 ## 履歴
 ```r
