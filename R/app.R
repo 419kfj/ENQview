@@ -8,6 +8,7 @@
 #
 
 # 履歴
+# 2025/05/27 tableに投入するdfの参照を[,vari]から[[vari]]に変更。これでエラーがでなくなった。
 # 2024/12/22 function化、パッケージ化、一段落
 # 2024/12/21 function化作業開始
 # 2024/01/30 gitでの管理を開始
@@ -178,15 +179,15 @@ server <- function(input, output, session) {
   # barplot by ggplot2
     output$barchart <- renderPlot({            # input$select_input_data_for_hist
       data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>%
-#        mutate(rate=100 * n/sum(n)) %>%
-        mutate(rate=100 * as.numeric(n)/sum(as.numeric(n))) %>%
+        mutate(rate=100 * n/sum(n)) %>%
+#        mutate(rate=100 * as.numeric(n)/sum(as.numeric(n))) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$variables[1])
     })
 
     output$barchart2 <- renderPlot({
       data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>%
-#        mutate(rate=100* n/ sum(n)) %>%
-        mutate(rate=100* as.numeric(n)/ sum(as.numeric(n))) %>%
+        mutate(rate=100* n/ sum(n)) %>%
+#        mutate(rate=100* as.numeric(n)/ sum(as.numeric(n))) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$select_input_data_for_hist)
     })
 
@@ -230,8 +231,8 @@ server <- function(input, output, session) {
     })
     # 層化mosaic　plot
     output$crosschart2 <- renderPlot({
-      .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
-                    data_for_plot()[,input$variables[1]])  # select_input_data_for_hist
+      .tbl <- table(data_for_plot()[[input$select_input_data_for_cross]],
+                    data_for_plot()[[input$variables[1]]])  # select_input_data_for_hist
       .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
       tab <- ifelse(.tbl.p < 1, NA, .tbl.p)
 
@@ -268,14 +269,14 @@ server <- function(input, output, session) {
 
 # chisq.test
     output$chisq_test <- renderPrint({
-      res.chisq <- chisq.test(table(data_for_plot()[,input$select_input_data_for_cross],
-                       data_for_plot()[,input$variables[1]]),correct = FALSE)  #select_input_data_for_hist]))
+      res.chisq <- chisq.test(table(data_for_plot()[[input$select_input_data_for_cross]],
+                       data_for_plot()[[input$variables[1]]]),correct = FALSE)  #select_input_data_for_hist]))
       print(res.chisq)
     })
 
     output$chisq_test2 <- renderPrint({
-      res.chisq <- chisq.test(table(data_for_plot()[,input$select_input_data_for_cross],
-                                    data_for_plot()[,input$variables[1]]),correct = FALSE)  #select_input_data_for_hist]))
+      res.chisq <- chisq.test(table(data_for_plot()[[input$select_input_data_for_cross]],
+                                    data_for_plot()[[input$variables[1]]]),correct = FALSE)  #select_input_data_for_hist]))
       print(res.chisq)
     })
 
@@ -567,13 +568,13 @@ server <- function(input, output, session) {
 
 # 度数分布表
     output$simple_table <- DT::renderDataTable({ #renderTable({#
-      table(data_for_plot()[,input$variables[1]]) -> tmp #select_input_data_for_hist]) -> tmp
+      table(data_for_plot()[[input$variables[1]]]) -> tmp #select_input_data_for_hist]) -> tmp
       round(100*prop.table(tmp),1) -> tmp2
       data.frame(tmp,rate=tmp2)[,c(1,2,4)]
     })
 
     output$simple_table2 <- DT::renderDataTable({ #renderTable({#
-      table(data_for_plot()[,input$select_input_data_for_hist]) -> tmp
+      table(data_for_plot()[[input$select_input_data_for_hist]]) -> tmp
       round(100*prop.table(tmp),1) -> tmp2
       data.frame(tmp,rate=tmp2)[,c(1,2,4)]
     })
