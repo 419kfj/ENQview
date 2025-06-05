@@ -2,12 +2,13 @@
 
 
 ## install方法
-
+```r
 if (!require(devtools)){
     install.packages('devtools')
     library(devtools)
 }
 devtools::install_github("419kfj/ENQview", upgrade="never")
+```
 
 ## 呼び出し手順
 
