@@ -8,8 +8,6 @@
 #' 　speMCAが生成したresultは、ダウンロードすることが可能なので、これをexplorに渡す、もしくは、
 #' 　そのあとの追加変数処理に渡すことが可能
 #' @export
-
-
 Shiny_speMCA <- function(df) {
   library(shiny)
   library(FactoMineR)
