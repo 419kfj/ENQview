@@ -65,7 +65,7 @@ make_grouped_MA_tbl2 <- function(df,selected_vars,layer_val,...){　# bayes補�
 #' グラフ描画用function
 #'
 #' 層化MAplot（Dot plot）
-#' @export`
+#' @export
 LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
   MA_group_tbl %>% select(-度数) %>%
     pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換

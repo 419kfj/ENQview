@@ -179,10 +179,6 @@ Shiny_speMCA <- function(df) {
         }
       )
     })
-
-
-
-
   }
 
   shinyApp(ui, server)

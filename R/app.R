@@ -1,11 +1,10 @@
 #' 調査票データ一覧ツール
-#'
+#
 #' 履歴
 #' 2025/05/27 tableに投入するdfの参照を[,vari]から[[vari]]に変更。これでエラーがでなくなった。
 #' 2024/12/22 function化、パッケージ化、一段落
 #' 2024/12/21 function化作業開始
-#' 2024/01/30 gitでの管理を開始
-#'
+#' 2024/01/30 gitでの管理　を開始
 #' @export
 ENQview <- function(data.df=Bunka2,...){
 #ENQview <- function(data.df=cyder2024a.all.df,...){
