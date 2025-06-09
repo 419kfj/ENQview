@@ -7,7 +7,6 @@
 #' 2024/01/30 gitでの管理を開始
 #'
 #' @export
-
 ENQview <- function(data.df=Bunka2,...){
 #ENQview <- function(data.df=cyder2024a.all.df,...){
 

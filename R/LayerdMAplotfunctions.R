@@ -8,7 +8,6 @@
 #' Output
 #' df format
 #' @export
-
 make_grouped_MA_tbl <- function(df,selected_vars,layer_val,...){
   data_for_plot <- df
   selected_data <- data_for_plot[, selected_vars, drop = FALSE]
@@ -22,7 +21,8 @@ make_grouped_MA_tbl <- function(df,selected_vars,layer_val,...){
 
 #----
 
-# ベイス補正をするためのベータ分布のパラメータをEとVから求める
+#' ベイス補正をするためのベータ分布のパラメータをEとVから求める
+#' @export
 get_Be_pram <- function(E,V){
   alpha <- E * (E*(1-E)/V - 1)
   beta <- (1-E) * (E*(1-E)/V -1)
@@ -31,7 +31,7 @@ get_Be_pram <- function(E,V){
 
 #Freq　vari2
 #Rate　vari1
-
+#' @export
 make_bayes_vec　<- function(度数,Freq,...){
   data.frame(度数,Freq) %>% mutate(weight=度数/sum(度数),Rate = Freq/度数) %>%
     mutate(E = sum(Rate * weight), V = sum((Rate - E)^2 * Rate)) %>%
@@ -42,6 +42,7 @@ make_bayes_vec　<- function(度数,Freq,...){
   return(res.bayes$post)
 }
 
+#' @export
 make_grouped_MA_tbl2 <- function(df,selected_vars,layer_val,...){　# bayes補正付きの表作成
   data_for_plot <- df
   selected_data <- data_for_plot[, selected_vars, drop = FALSE]
@@ -61,9 +62,10 @@ make_grouped_MA_tbl2 <- function(df,selected_vars,layer_val,...){　# bayes補�
 }
 
 #------
-# グラフ描画用function
-## 層化MAplot（Dot plot）
-
+#' グラフ描画用function
+#'
+#' 層化MAplot（Dot plot）
+#' @export`
 LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
   MA_group_tbl %>% select(-度数) %>%
     pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
@@ -82,7 +84,9 @@ LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
 }
 
 #----
-## ファセット表示
+#
+# ファセット表示
+#'@export
 facet_layered_MA <- function(MA_group_tbl,selected_vars,layer_val,...){
   MA_group_tbl %>% select(-度数) %>%
     pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
@@ -98,7 +102,7 @@ facet_layered_MA <- function(MA_group_tbl,selected_vars,layer_val,...){
 }
 
 # sample script
-
+#'@export
 plot_layered_MA <- function(df,selected_vars,layer_val,...){
   make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
   LayeredMAplot(selected_vars,layer_val)
