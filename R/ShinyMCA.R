@@ -8,7 +8,7 @@
 #' 　そのあとの追加変数処理に渡すことが可能
 #' @export
 
-launch_app <- function(df) {
+Shiny_speMCA <- function(df) {
   library(shiny)
   library(FactoMineR)
   library(GDAtools)
