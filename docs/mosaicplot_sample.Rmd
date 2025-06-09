@@ -1,0 +1,88 @@
+---
+title: "mosaic plot sample"
+author: "kazuo.fujimoto2007@gmail.com"
+date: "2024-12-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(vcd)
+library(ENQview)
+```
+
+
+```{r}
+load("../../ENQview_data/data_0/WVS2019_jp_A.rda")
+```
+
+```{r}
+#WVS2019_jp %>% names
+```
+
+```{r fig.showtext=TRUE,fig.width=10}
+table(WVS2019_jp$`X003R Age recoded (6 intervals)`,WVS2019_jp$`Q3 Important in life: Leisure time`) %>% 
+  structable %>% mosaic(las=2,shade = TRUE)
+```
+
+
+# Q201-208をrecodeする
+
+```{r}
+before <- c("Daily","Weekly","Monthly","Less than monthly","Never")
+after <- c(1,1,0,0,0)
+conv_vec <- setNames(before,after)
+
+WVS2019_jp %>% count(`Q201 Information source: Daily newspaper`)
+```
+
+
+```{r}
+#[242] "Q201 Information source: Daily newspaper"                                                                              #[243] "Q202 Information source: TV news"                                                                                     
+#[244] "Q203 Information source: Radio news"                                                                                
+#[245] "Q204 Information source: Mobile phone"                                                                                
+#[246] "Q205 Information source: Email"                                                                                      #[247] "Q206 Information source: Internet"                                                                                 
+#[248] "Q207 Information source: Social media (Facebook, Twitter, etc.)"                                                      
+#[249] "Q208 Information source: Talk with friends or colleagues"
+
+
+
+WVS2019_jp %>% 
+  mutate("Q201_Newspaper" = fct_recode(`Q201 Information source: Daily newspaper`,!!!conv_vec) ) %>% 
+  mutate("Q202_TVnews"    = fct_recode(`Q202 Information source: TV news`,!!!conv_vec) ) %>% 
+  mutate("Q203_RadioNews" = fct_recode(`Q203 Information source: Radio news`,!!!conv_vec) ) %>% 
+  mutate("Q204_MoblePhone"= fct_recode(`Q204 Information source: Mobile phone`,!!!conv_vec) ) %>% 
+  mutate("Q205_Email"    = fct_recode(`Q205 Information source: Email`,!!!conv_vec) ) %>% 
+  mutate("Q206_Internaet" = fct_recode(`Q206 Information source: Internet`,!!!conv_vec) ) %>% 
+  mutate("Q207_SocialMedhia" = fct_recode(`Q207 Information source: Social media (Facebook, Twitter, etc.)`,!!!conv_vec) ) %>% 
+  mutate("Q208_Conversation" = fct_recode(`Q208 Information source: Talk with friends or colleagues`,!!!conv_vec) ) -> WVS2019_jp_Q201_8
+```
+
+
+```{r}
+WVS2019_jp_Q201_8 %>% count(Q201_Newspaper)
+WVS2019_jp_Q201_8 %>% count(Q202_TVnews)
+WVS2019_jp_Q201_8 %>% count(Q203_RadioNews)
+WVS2019_jp_Q201_8 %>% count(Q204_MoblePhone)
+WVS2019_jp_Q201_8 %>% count(Q205_Email)
+WVS2019_jp_Q201_8 %>% count(Q206_Internaet)
+WVS2019_jp_Q201_8 %>% count(Q207_SocialMedhia)
+WVS2019_jp_Q201_8 %>% count(Q208_Conversation)
+```
+
+```{r}
+WVS2019_jp_Q201_8 %>% save(file="WVS2019_jp_Q201_8.rda")
+```
+
+
+
+```{r eval=FALSE}
+load("../../ENQview_data/data_0/Bunka2.rda")
+ENQview(Bunka2)
+ENQview(WVS2019_jp[,100:150])
+```
+
