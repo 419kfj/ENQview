@@ -144,37 +144,6 @@ Shiny_speMCA <- function(df) {
         theme_minimal()
     })
 
-    # output$var_map <- renderPlotly({
-    #   res <- mca_result()
-    #   if (is.null(res)) return(NULL)
-    #
-    #   p <- ggcloud_variables(res) +
-    #     coord_fixed(ratio = 1) +
-    #     theme(aspect.ratio = 1)  # 縦横比固定
-    #
-    #   ggplotly(p) %>%
-    #     layout(
-    #       autosize = TRUE,
-    #       yaxis = list(scaleanchor = "x", scaleratio = 1),  # ← aspect比 1:1 を保証
-    #       margin = list(t = 50, b = 50, l = 50, r = 50)
-    #     )
-    # })
-    #
-    # output$ind_map <- renderPlotly({
-    #   res <- mca_result()
-    #   if (is.null(res)) return(NULL)
-    #
-    #   p <- ggcloud_indiv(res) +
-    #     coord_fixed(ratio = 1) +
-    #     theme(aspect.ratio = 1)
-    #
-    #   ggplotly(p) %>%
-    #     layout(
-    #       autosize = TRUE,
-    #       yaxis = list(scaleanchor = "x", scaleratio = 1),
-    #       margin = list(t = 50, b = 50, l = 50, r = 50)
-    #     )
-    # })
 
     output$var_map <- renderPlot({
       res <- mca_result()
