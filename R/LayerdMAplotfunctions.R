@@ -85,8 +85,8 @@ LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
 
 #----
 #
-# ファセット表示
-#'@export
+#' ファセット表示
+#' @export
 facet_layered_MA <- function(MA_group_tbl,selected_vars,layer_val,...){
   MA_group_tbl %>% select(-度数) %>%
     pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
@@ -101,8 +101,8 @@ facet_layered_MA <- function(MA_group_tbl,selected_vars,layer_val,...){
     theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
 }
 
-# sample script
-#'@export
+#' sample script
+#' @export
 plot_layered_MA <- function(df,selected_vars,layer_val,...){
   make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
   LayeredMAplot(selected_vars,layer_val)

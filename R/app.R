@@ -28,7 +28,7 @@ showtext_auto(TRUE)
 ##ui <- navbarPage("調査データ簡易集計",
 ui <- fluidPage("調査データ簡易集計",
 #                tabPanel("About",
-# 　　　　　　　　　　　　textOutput("timestamp")  # タイムスタンプの表示
+#             textOutput("timestamp")  # タイムスタンプの表示
 #                ),
                #--------------------------------
                tabPanel(
@@ -43,7 +43,7 @@ ui <- fluidPage("調査データ簡易集計",
 #                    )
                  ),
 
-                    selectInput("variables", "変数の複数選択（MAなど）単変数では最初のものだけ:",
+                    selectInput("variables", "変数の複数選択（MAなど )単変数では最初のものだけ:",
                                 choices =  NULL,
                                 multiple = TRUE,
                                 selectize = FALSE,
@@ -58,10 +58,10 @@ ui <- fluidPage("調査データ簡易集計",
                                choices = NULL),
                   selectInput("select_input_data_for_hist",
                               "集計する変数",
-                              choices = colnames("selected_data_for_plot"),
+                              choices = NULL, #colnames("selected_data_for_plot"),
                               selected =  colnames(data.df)[3]),
                  ),
-                 #----　MAIN Panel
+                 #---- MAIN Panel
                  mainPanel(
                    tabsetPanel(type = "tabs",
                                tabPanel("単変数集計",
@@ -70,7 +70,7 @@ ui <- fluidPage("調査データ簡易集計",
                                         DT::dataTableOutput("simple_table"), # server.R も対応させること！
                                ),
                                tabPanel("2変数分析",
-                                        h2("クロス集計（gtsummary::tbl_cross）"),
+                                        h2("クロス集計（gtsummary::tbl_cross )"),
                                       #  verbatimTextOutput("crosstable"),
                                         gt_output(outputId = "my_gt_table2"),
                                         plotOutput("crosschart",width = 600, height = 600),
@@ -87,8 +87,8 @@ ui <- fluidPage("調査データ簡易集計",
                                ),
 
 
-                               tabPanel("2変数分析（層化）",
-                                        h2("クロス集計（gtsummary::tbl_cross）"),
+                               tabPanel("2変数分析（層化 )",
+                                        h2("クロス集計（gtsummary::tbl_cross )"),
                                         #  verbatimTextOutput("crosstable"),
                                         gt_output(outputId = "my_gt_table"),
                                         plotOutput("crosschart2",width = 900, height = 600),
@@ -127,9 +127,9 @@ ui <- fluidPage("調査データ簡易集計",
                                         DT::dataTableOutput("table_for_plot")
                                ),
                    )
-              　)
+               )
                ),
-)　
+)
 
 #-------------------------------------------------------------------------------
 # Define server logic required to draw outlut tables and graphs
@@ -158,7 +158,7 @@ server <- function(input, output, session) {
                      "iwate.f" = iwate.f[,-c(1,2)],
                      "Bunka" = Bunka[,-c(1,2)],
                      "Bunka3" = Bunka3[,],
-                     "UTAS2020_a" =　UTAS2020_a[,-c(1,2)],
+                     "UTAS2020_a" = UTAS2020_a[,-c(1,2)],
                      "issp2016" = issp2016[,-c(1,2,3,4)]
                      )
       updateSelectInput(session, "select_input_data_for_hist", choices = colnames(data))
@@ -218,7 +218,7 @@ server <- function(input, output, session) {
                labeling=labeling_values
         )
     })
-    # 層化mosaic　plot
+    # 層化mosaic plot
     output$crosschart2 <- renderPlot({
       .tbl <- table(data_for_plot()[[input$select_input_data_for_cross]],
                     data_for_plot()[[input$variables[1]]])  # select_input_data_for_hist
@@ -295,7 +295,7 @@ server <- function(input, output, session) {
           scale_y_continuous(labels = scales::percent_format()) +
           labs(title = selected_vars,
                x = "質問項目",
-               y = "割合（%）") +
+               y = "割合（% )") +
           theme_minimal()
       }
     })
@@ -317,8 +317,8 @@ server <- function(input, output, session) {
                 panel.grid.minor.x = element_blank(),
                 panel.grid.major.y = element_line(colour="grey60",linetype="dashed")) +
           labs(title = selected_vars,
-               x = "割合（%）",y = "質問項目")
-    　　}
+               x = "割合（% )",y = "質問項目")
+      }
     })
 
     # 層化MA折れ線グラフ
@@ -337,7 +337,7 @@ server <- function(input, output, session) {
         ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable,
                             shape =variable, group = variable)) +
           geom_line(aes(color = variable)) +  # 折れ線グラフ
-          geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら）
+          geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら )
           labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
           theme_minimal() +  # 見た目をシンプルに
           scale_color_discrete() +
@@ -420,7 +420,7 @@ server <- function(input, output, session) {
       rownames(cat_tbl) <- c("++","+","-","--","DK","無回答")
       cat_tbl
 
-　　　res.CA <- FactoMineR::CA(t(cat_tbl))
+   res.CA <- FactoMineR::CA(t(cat_tbl))
 
     })
 
@@ -484,7 +484,7 @@ server <- function(input, output, session) {
 
       selected_vars <- input$variables
       vectors <- map(selected_vars, ~ {
-　        data_for_plot() %>% select(selected_vars) %>%
+         data_for_plot() %>% select(selected_vars) %>%
           count(!!sym(.x)) %>%  # 選択した列ごとにカウント
           pull(1)               # 最初の列のユニークな値を取得
       })
