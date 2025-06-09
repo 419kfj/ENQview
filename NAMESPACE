@@ -2,4 +2,3 @@
 
 export(Shiny_speMCA)
 export(make_grouped_MA_tbl)
-export(run_app)
