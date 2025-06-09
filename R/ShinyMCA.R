@@ -1,4 +1,5 @@
 #' speMCA用の変数選択app
+#'
 #' dfを指定して、appを起動
 #' Active変数を選択
 #' juckカテゴリを選択
@@ -7,6 +8,7 @@
 #' 　speMCAが生成したresultは、ダウンロードすることが可能なので、これをexplorに渡す、もしくは、
 #' 　そのあとの追加変数処理に渡すことが可能
 #' @export
+
 
 Shiny_speMCA <- function(df) {
   library(shiny)
