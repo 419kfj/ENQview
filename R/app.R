@@ -179,15 +179,13 @@ server <- function(input, output, session) {
   # barplot by ggplot2
     output$barchart <- renderPlot({            # input$select_input_data_for_hist
       data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>%
-        mutate(rate=100 * n/sum(n)) %>%
-#        mutate(rate=100 * as.numeric(n)/sum(as.numeric(n))) %>%
+        mutate(rate=100 * .data[["n"]]/sum(.data[["n"]])) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$variables[1])
     })
 
     output$barchart2 <- renderPlot({
       data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>%
-        mutate(rate=100* n/ sum(n)) %>%
-#        mutate(rate=100* as.numeric(n)/ sum(as.numeric(n))) %>%
+        mutate(rate=100* .data[["n"]]/ sum(.data[["n"]])) %>%
         ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$select_input_data_for_hist)
     })
 
@@ -212,9 +210,6 @@ server <- function(input, output, session) {
 
     # mosaic plot
     output$crosschart <- renderPlot({
-#      .tbl <- table(data_for_plot()[,input$select_input_data_for_cross],
-#                    data_for_plot()[,input$variables[1]])  #select_input_data_for_hist
-
       .tbl <- table(data_for_plot()[[input$select_input_data_for_cross]],
                     data_for_plot()[[input$variables[1]]])  #select_input_data_for_hist
 
