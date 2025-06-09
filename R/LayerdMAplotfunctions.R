@@ -1,14 +1,14 @@
-# 層化MAplotのための層化MAtableの構築
+#’ 層化MAplotのための層化MAtableの構築
+#'
+#' Input　
+#' df  入力データフレーム（全体）df
+#' selected_vars 選択したMA変数（Q7#1...）chars
+#' layer_val 層化変数名 文字列 char
+#'
+#' Output
+#' df format
+#' @export
 
-## Input　
-# df  入力データフレーム（全体）df
-# selected_vars 選択したMA変数（Q7#1...）chars
-# layer_val 層化変数名 文字列 char
-
-## Output
-
-
-# df format
 make_grouped_MA_tbl <- function(df,selected_vars,layer_val,...){
   data_for_plot <- df
   selected_data <- data_for_plot[, selected_vars, drop = FALSE]
