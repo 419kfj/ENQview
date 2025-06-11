@@ -3,7 +3,7 @@
 export(ENQview)
 export(LayeredMAplot)
 export(Shiny_ca)
-export(Shiny_speMCA2)
+export(Shiny_speMCA)
 export(facet_layered_MA)
 export(get_Be_pram)
 export(make_bayes_vec)
