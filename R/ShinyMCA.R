@@ -4,20 +4,24 @@
 #' Active変数を選択
 #' juckカテゴリを選択
 #' speMCAを実行
-#' 　これによって、修正慣性率、変数マップ、個体マップを表示できるようになる。
-#' 　speMCAが生成したresultは、ダウンロードすることが可能なので、これをexplorに渡す、もしくは、
-#' 　そのあとの追加変数処理に渡すことが可能
+#' これによって、修正慣性率、変数マップ、個体マップを表示できるようになる。
+#' speMCAが生成したresultは、ダウンロードすることが可能なので、これをexplorに渡す、もしくは、
+#' そのあとの追加変数処理に渡すことが可能
+#' 2025/06/11 追加変数の選択、マップ表示、交互作用plotの機能を追加した
 #' @export
-Shiny_speMCA <- function(df) {
-  library(shiny)
-  library(FactoMineR)
-  library(GDAtools)
-  library(ggplot2)
-#  library(plotly)
-  library(DT)
 
+require(dplyr)
+require(shiny)
+require(FactoMineR)
+require(GDAtools)
+require(ggplot2)
+require(DT)
+require(showtext)
+showtext_auto(TRUE)
+
+Shiny_speMCA <- function(df) {
   ui <- fluidPage(
-    titlePanel("speMCA 分析アプリ（junkカテゴリ除外対応）"),
+    titlePanel("speMCA 分析アプリ"),
     sidebarLayout(
       sidebarPanel(
         selectInput("variables", "Active変数を選んでください",
@@ -26,21 +30,34 @@ Shiny_speMCA <- function(df) {
                     selectize = FALSE,
                     size = 7),
         uiOutput("junk_selector"),  # 動的UI：junkカテゴリ選択
+        selectInput("supvars", "追加変数を選んでください",
+                    choices = names(df),
+                    multiple = TRUE,
+                    selectize = FALSE,
+                    size = 7),
+        selectInput("inter_v1", "交互作用v1を選んでください",
+                    choices = names(df),
+                    multiple = FALSE),
+        selectInput("inter_v2", "交互作用v1を選んでください",
+                    choices = names(df),
+                    multiple = FALSE),
         downloadButton("download_mca", "speMCA結果をダウンロード")  # ← ダウンロードボタン
       ),
       mainPanel(
         tabsetPanel(
-          tabPanel("選択情報", uiOutput("selected_info")),  # ←追加
+          tabPanel("選択変数", uiOutput("selected_info")),  # ←追加
           tabPanel("修正慣性率",
                    tableOutput("eig_table"),
                    plotOutput("eig_plot")
           ),
-
-#          tabPanel("変数マップ", plotlyOutput("var_map")),
-#          tabPanel("個体マップ", plotlyOutput("ind_map")),
           tabPanel("変数マップ", plotOutput("var_map")),
           tabPanel("個体マップ", plotOutput("ind_map")),
-          tabPanel("データ表示",DTOutput("data_table"))
+          tabPanel("データ表示",DTOutput("data_table")),
+         # tabPanel("supvarの情報", verbatimTextOutput("supvar_out")),
+         # tabPanel("変数マップ＋supvar", plotOutput("supvar_map")),
+          tabPanel("supvarsの情報", verbatimTextOutput("supvars_out")),
+          tabPanel("変数マップ＋supvars", plotOutput("supvars_map")),
+         tabPanel("交互作用plot", plotOutput("interaction_map"))
         )
       )
     )
@@ -57,7 +74,94 @@ Shiny_speMCA <- function(df) {
       jc
     })
 
+## ------------------------------------次の----までコメントアウト-----------------------
+    # # supvar結果を計算
+    # supvar_result <- reactive({
+    #   req(mca_result(), input$supvar)
+    #   tryCatch({
+    #     GDAtools::supvar(resmca = mca_result(), var = df[[input$supvar]])
+    #   }, error = function(e) {
+    #     message("supvarエラー: ", e$message)
+    #     NULL
+    #   })
+    # })
+    #
+    # # supvarの出力を表示（テキスト）
+    # output$supvar_out <- renderPrint({
+    #   res <- supvar_result()
+    #   if (is.null(res)) return("supvarの結果がありません")
+    #   print(res)
+    # })
+    #
+    # # ggadd_supvarを使ってマップを表示
+    # output$supvar_map <- renderPlot({
+    #   req(mca_result(), input$supvar)
+    #   tryCatch({
+    #     base_map <- GDAtools::ggcloud_variables(mca_result(), col = "lightgrey")
+    #     GDAtools::ggadd_supvar(p = base_map,
+    #                            resmca = mca_result(),
+    #                            var = df[[input$supvar]]) + theme(aspect.ratio = 1)
+    #   }, error = function(e) {
+    #     message("ggadd_supvar エラー: ", e$message)
+    #     return(NULL)
+    #   })
+    # })
+###-----------------------------------------------------------------
+    # supvars結果を計算
+    supvars_result <- reactive({
+      req(mca_result(), input$supvars)
+ #     browser()##
+      tryCatch({
+        GDAtools::supvars(resmca = mca_result(), vars = (df %>% select(input$supvars)))
+      }, error = function(e) {
+        message("supvarsエラー: ", e$message)
+        NULL
+      })
+    })
 
+    # supvarsの出力を表示（テキスト）
+    output$supvars_out <- renderPrint({
+ #     browser()##
+      res <- supvars_result()
+      if (is.null(res)) return("supvarsの結果がありません")
+      print(res)
+    })
+
+    # ggadd_supvarsを使ってマップを表示
+    output$supvars_map <- renderPlot({
+      req(mca_result(), input$supvars)
+ #     browser()##
+      tryCatch({
+        base_map <- GDAtools::ggcloud_variables(mca_result(), col = "lightgrey")
+        GDAtools::ggadd_supvars(p = base_map,
+                               resmca = mca_result(),
+                               vars = (df %>% select(input$supvars))) +#df[[input$supvars]]) +
+                               theme(aspect.ratio = 1)
+      }, error = function(e) {
+        message("ggadd_supvars エラー: ", e$message)
+        return(NULL)
+      })
+    })
+
+###
+    output$interaction_map <- renderPlot({
+      req(input$inter_v1, input$inter_v2)
+      #     browser()##
+      tryCatch({
+        base_map <- GDAtools::ggcloud_variables(mca_result(), col = "lightgrey")
+        GDAtools::ggadd_interaction(p = base_map,
+                                resmca = mca_result(),
+                                v1 = df[[input$inter_v1]],
+                                v2 = df[[input$inter_v2]]) + theme(aspect.ratio = 1)
+      }, error = function(e) {
+        message("ggadd_interaction エラー: ", e$message)
+        return(NULL)
+      })
+    })
+
+
+
+##-------
     output$junk_selector <- renderUI({
       jc <- junk_cat()
       if (is.null(jc)) return(NULL)
