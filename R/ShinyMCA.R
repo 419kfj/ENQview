@@ -74,39 +74,6 @@ Shiny_speMCA <- function(df) {
       jc
     })
 
-## ------------------------------------次の----までコメントアウト-----------------------
-    # # supvar結果を計算
-    # supvar_result <- reactive({
-    #   req(mca_result(), input$supvar)
-    #   tryCatch({
-    #     GDAtools::supvar(resmca = mca_result(), var = df[[input$supvar]])
-    #   }, error = function(e) {
-    #     message("supvarエラー: ", e$message)
-    #     NULL
-    #   })
-    # })
-    #
-    # # supvarの出力を表示（テキスト）
-    # output$supvar_out <- renderPrint({
-    #   res <- supvar_result()
-    #   if (is.null(res)) return("supvarの結果がありません")
-    #   print(res)
-    # })
-    #
-    # # ggadd_supvarを使ってマップを表示
-    # output$supvar_map <- renderPlot({
-    #   req(mca_result(), input$supvar)
-    #   tryCatch({
-    #     base_map <- GDAtools::ggcloud_variables(mca_result(), col = "lightgrey")
-    #     GDAtools::ggadd_supvar(p = base_map,
-    #                            resmca = mca_result(),
-    #                            var = df[[input$supvar]]) + theme(aspect.ratio = 1)
-    #   }, error = function(e) {
-    #     message("ggadd_supvar エラー: ", e$message)
-    #     return(NULL)
-    #   })
-    # })
-###-----------------------------------------------------------------
     # supvars結果を計算
     supvars_result <- reactive({
       req(mca_result(), input$supvars)
