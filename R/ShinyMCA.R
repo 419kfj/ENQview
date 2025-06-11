@@ -9,17 +9,16 @@
 #' そのあとの追加変数処理に渡すことが可能
 #' 2025/06/11 追加変数の選択、マップ表示、交互作用plotの機能を追加した
 #' @export
-
-require(dplyr)
-require(shiny)
-require(FactoMineR)
-require(GDAtools)
-require(ggplot2)
-require(DT)
-require(showtext)
-showtext_auto(TRUE)
-
 Shiny_speMCA <- function(df) {
+  require(dplyr)
+  require(shiny)
+  require(FactoMineR)
+  require(GDAtools)
+  require(ggplot2)
+  require(DT)
+  require(showtext)
+  showtext_auto(TRUE)
+
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),
     sidebarLayout(
