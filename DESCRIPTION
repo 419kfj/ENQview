@@ -1,6 +1,6 @@
 Package: ENQview
 Title: View the ENQ data and tools
-Version: 0.10.002
+Version: 0.10.003
 Authors@R: 
     person("kazuo", "fujimoto", , "kazuo.fujimoto2007@gmail.com", role = c("aut", "cre"))
 Description: View the ENQ data (one paragraph).
@@ -13,6 +13,7 @@ Depends:
     R (>= 3.5)
 LazyData: true
 Imports:
+    GDAtools (>= 2.2),
     shiny,
     FactoMineR,
     dplyr,
