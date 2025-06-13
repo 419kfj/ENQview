@@ -9,16 +9,16 @@
 ENQview <- function(data.df=Bunka2,...){
 #ENQview <- function(data.df=cyder2024a.all.df,...){
 
-library(shiny)
-library(FactoMineR)
-library(tidyverse)
-library(vcd)
-library(GGally)
-library(DT)
-library(gtsummary)
-library(gt)
-library(readxl)
-library(showtext)
+# library(shiny)
+# library(FactoMineR)
+# library(tidyverse)
+# library(vcd)
+# library(GGally)
+# library(DT)
+# library(gtsummary)
+# library(gt)
+# library(readxl)
+# library(showtext)
 showtext_auto(TRUE)
 
 #-------------------------------------------------------------------------------

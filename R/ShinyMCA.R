@@ -10,13 +10,13 @@
 #' 2025/06/11 追加変数の選択、マップ表示、交互作用plotの機能を追加した
 #' @export
 Shiny_speMCA <- function(df) {
-  require(dplyr)
-  require(shiny)
-  require(FactoMineR)
-  require(GDAtools)
-  require(ggplot2)
-  require(DT)
-  require(showtext)
+  # require(dplyr)
+  # require(shiny)
+  # require(FactoMineR)
+  # require(GDAtools)
+  # require(ggplot2)
+  # require(DT)
+  # require(showtext)
   showtext_auto(TRUE)
 
   ui <- fluidPage(
