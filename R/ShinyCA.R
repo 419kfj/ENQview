@@ -1,11 +1,15 @@
-library(shiny)
-library(FactoMineR)
-library(ggplot2)
-library(vcd)
-library(DT)
-
+#' df から二編数を選択して、Mosaic plotとCAを実行する
+#'
 #' @export
+
 Shiny_ca <- function(df) {
+  # require(shiny)
+  # require(FactoMineR)
+  # require(ggplot2)
+  # require(vcd)
+  # require(DT)
+  # require(showtext)
+  showtext_auto(TRUE)
   ui <- fluidPage(
     titlePanel("対応分析アプリ（CA）"),
     sidebarLayout(
