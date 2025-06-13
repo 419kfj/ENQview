@@ -15,15 +15,7 @@
 #' @importFrom DT datatable
 #' @export
 Shiny_speMCA <- function(df) {
-  # require(dplyr)
-  # require(shiny)
-  # require(FactoMineR)
-  # require(GDAtools)
-  # require(ggplot2)
-  # require(DT)
-  # require(showtext)
 　showtext::showtext_auto(TRUE)
-
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),
     sidebarLayout(
@@ -57,8 +49,6 @@ Shiny_speMCA <- function(df) {
           tabPanel("変数マップ", plotOutput("var_map")),
           tabPanel("個体マップ", plotOutput("ind_map")),
           tabPanel("データ表示",DTOutput("data_table")),
-         # tabPanel("supvarの情報", verbatimTextOutput("supvar_out")),
-         # tabPanel("変数マップ＋supvar", plotOutput("supvar_map")),
           tabPanel("supvarsの情報", verbatimTextOutput("supvars_out")),
           tabPanel("変数マップ＋supvars", plotOutput("supvars_map")),
          tabPanel("交互作用plot", plotOutput("interaction_map"))
@@ -66,7 +56,9 @@ Shiny_speMCA <- function(df) {
       )
     )
   )
-
+# ----
+# SERVER part
+# ----
   server <- function(input, output, session) {
     # junkカテゴリ取得
     junk_cat <- reactive({
@@ -81,7 +73,6 @@ Shiny_speMCA <- function(df) {
     # supvars結果を計算
     supvars_result <- reactive({
       req(mca_result(), input$supvars)
- #     browser()##
       tryCatch({
         GDAtools::supvars(resmca = mca_result(), vars = (df %>% select(input$supvars)))
       }, error = function(e) {
@@ -92,7 +83,6 @@ Shiny_speMCA <- function(df) {
 
     # supvarsの出力を表示（テキスト）
     output$supvars_out <- renderPrint({
- #     browser()##
       res <- supvars_result()
       if (is.null(res)) return("supvarsの結果がありません")
       print(res)
@@ -101,7 +91,6 @@ Shiny_speMCA <- function(df) {
     # ggadd_supvarsを使ってマップを表示
     output$supvars_map <- renderPlot({
       req(mca_result(), input$supvars)
- #     browser()##
       tryCatch({
         base_map <- GDAtools::ggcloud_variables(mca_result(), col = "lightgrey")
         GDAtools::ggadd_supvars(p = base_map,
@@ -112,9 +101,9 @@ Shiny_speMCA <- function(df) {
         message("ggadd_supvars エラー: ", e$message)
         return(NULL)
       })
-    })
+    },width = "auto", height = 600)
 
-###
+### 交互作用Plot
     output$interaction_map <- renderPlot({
       req(input$inter_v1, input$inter_v2)
       #     browser()##
@@ -128,7 +117,7 @@ Shiny_speMCA <- function(df) {
         message("ggadd_interaction エラー: ", e$message)
         return(NULL)
       })
-    })
+    },width = "auto", height = 600)
 
 
 
@@ -140,7 +129,7 @@ Shiny_speMCA <- function(df) {
       tagList(
         selectInput(
           inputId = "excluded_cats",
-          label = "除外するカテゴリを選択してください",
+          label = "juck指定するカテゴリを選択してください",
           choices = jc,
           multiple = TRUE,
           selectize = FALSE,
@@ -151,12 +140,11 @@ Shiny_speMCA <- function(df) {
     })
 
 
-    # MCA 実行（除外カテゴリ反映）
+    # MCA 実行（specificMCA）
 
     mca_result <- eventReactive(input$run_mca, {
       req(input$variables)
       if (length(input$variables) < 2) return(NULL)
-
       df_sub <- df[, input$variables, drop = FALSE]
       jc <- junk_cat()
       selected_labels <- input$excluded_cats
@@ -176,6 +164,7 @@ Shiny_speMCA <- function(df) {
       })
     })
 
+## speMCAのresult ダウンローダー
 
     output$download_mca <- downloadHandler(
       filename = function() {
@@ -190,7 +179,7 @@ Shiny_speMCA <- function(df) {
         saveRDS(result, file)
       }
     )
-
+## 修正寄与率の表示
     output$eig_table <- renderTable({
       res <- mca_result()
       if (is.null(res)) return(NULL)
@@ -217,36 +206,37 @@ Shiny_speMCA <- function(df) {
         theme_minimal()
     })
 
-
+## 変数マップの表示
     output$var_map <- renderPlot({
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_variables(res) + theme(aspect.ratio=1)#coord_fixed(ratio=1)
-    })
+    },width="auto",height=600) #width = 600, height = 600)
 
+##　個体マップの表示
     output$ind_map <- renderPlot({
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_indiv(res) + theme(aspect.ratio=1)#coord_fixed(ratio=1)
-    })
+    },width = "auto", height = 600)
 
+## データ表の表示
     output$data_table <- renderDT({
       datatable(df, options = list(pageLength = 10))
     })
-
+## Active変数、junkカテゴリのリスト
     output$selected_info <- renderUI({
       req(input$variables)  # active変数がある前提
       vars <- input$variables
       junk <- input$excluded_cats
-
       tagList(
-        h4("選択された Active 変数"),
+        h4("Active 変数"),
         if (length(vars) > 0) {
           HTML(paste("<ul>", paste(paste0("<li>", vars, "</li>"), collapse = ""), "</ul>"))
         } else {
           em("なし")
         },
-        h4("除外された Junk カテゴリ"),
+        h4("Junk カテゴリ"),
         if (!is.null(junk) && length(junk) > 0) {
           HTML(paste("<ul>", paste(paste0("<li>", junk, "</li>"), collapse = ""), "</ul>"))
         } else {
@@ -256,5 +246,6 @@ Shiny_speMCA <- function(df) {
     })
   }
 
+# ShinyApp実行！
   shinyApp(ui, server)
 }

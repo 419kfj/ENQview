@@ -21,24 +21,12 @@
 ENQview <- function(data.df=Bunka2,...){
 #ENQview <- function(data.df=cyder2024a.all.df,...){
 
-# library(shiny)
-# library(FactoMineR)
-# library(tidyverse)
-# library(vcd)
-# library(GGally)
-# library(DT)
-# library(gtsummary)
-# library(gt)
-# library(readxl)
-# library(showtext)
 showtext::showtext_auto(TRUE)
 
 #-------------------------------------------------------------------------------
 # Define UI for application
 #
-##ui <- navbarPage("調査データ簡易集計",
 ui <- fluidPage("調査データ簡易集計",
-#                tabPanel("About",
 #             textOutput("timestamp")  # タイムスタンプの表示
 #                ),
                #--------------------------------
@@ -160,17 +148,17 @@ server <- function(input, output, session) {
 
     data_for_plot <- reactive({
       data <- switch(input$selected_data_for_plot,
-                     "data.df" = data.df,
-                     "iris" = iris,
-                     "titanic" = data.frame(lapply(data.frame(Titanic),
-                                                   function(i){rep(i, data.frame(Titanic)[, 5])})),
-                     "Womenlf" = Womenlf,
-                     "iwate.f2" = iwate.f2[,-c(1,2)],
-                     "iwate.f" = iwate.f[,-c(1,2)],
-                     "Bunka" = Bunka[,-c(1,2)],
-                     "Bunka3" = Bunka3[,],
-                     "UTAS2020_a" = UTAS2020_a[,-c(1,2)],
-                     "issp2016" = issp2016[,-c(1,2,3,4)]
+                     "data.df" = data.df#,
+                     # "iris" = iris,
+                     # "titanic" = data.frame(lapply(data.frame(Titanic),
+                     #                               function(i){rep(i, data.frame(Titanic)[, 5])})),
+                     # "Womenlf" = Womenlf,
+                     # "iwate.f2" = iwate.f2[,-c(1,2)],
+                     # "iwate.f" = iwate.f[,-c(1,2)],
+                     # "Bunka" = Bunka[,-c(1,2)],
+                     # "Bunka3" = Bunka3[,],
+                     # "UTAS2020_a" = UTAS2020_a[,-c(1,2)],
+                     # "issp2016" = issp2016[,-c(1,2,3,4)]
                      )
       updateSelectInput(session, "select_input_data_for_hist", choices = colnames(data))
       updateSelectInput(session, "select_input_data_for_cross", choices = c(" ",colnames(data)))
@@ -222,8 +210,8 @@ server <- function(input, output, session) {
 
       data_for_plot()[,c(input$variables[1],     #select_input_data_for_hist,
                          input$select_input_data_for_cross)] %>%
-        structable() %>%
-        mosaic(shade=TRUE,las=2,
+        vcd::structable() %>%
+        vcd::mosaic(shade=TRUE,las=2,
                labeling=labeling_values
         )
     })
