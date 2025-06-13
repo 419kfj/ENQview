@@ -18,12 +18,14 @@ library(ENQview)
 
 ## データを使えるようにする。
 ```r
-load("ENQview_data/df")
-ENQview(df)
+data(taste_J)
+ENQview(taste_J)
+Shiny_speMCA(taste_J)
 ```
 
 ## 履歴
 ```r
+2025/06/13　GitHub登録のファイルを整理。必要なPackage類をDESCRUPTIONに記述し、各Rファイルでは、#' @importや#' @importFrom で対応した
 2025/05/27　２変数のクロスの表示、mosaic plot、カイ２乗検定など、tableのなかで、df内の変数参照を変更。[,vari]から[[vari]]へ
 　　　　　　　 v0.8.0.9000　-> 0.8.1.1227 
 2024/12/22　一応、うごくようになった。
