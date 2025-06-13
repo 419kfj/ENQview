@@ -26,10 +26,10 @@ Shiny_speMCA <- function(df) {
   # }
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),
-    # tags$p(
-    #   paste0("ENQview Version: ", as.character(utils::packageVersion("ENQview"))),#get_pkg_version()),
-    #   style = "color: gray; margin-left: 15px;"
-    # ),
+    tags$p(
+      paste0("ENQview Version: ", as.character(utils::packageVersion("ENQview"))),#get_pkg_version()),
+      style = "color: gray; margin-left: 15px;"
+    ),
     sidebarLayout(
       sidebarPanel(
         selectInput("variables", "Active変数を選んでください",
