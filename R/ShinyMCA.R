@@ -8,6 +8,11 @@
 #' speMCAが生成したresultは、ダウンロードすることが可能なので、これをexplorに渡す、もしくは、
 #' そのあとの追加変数処理に渡すことが可能
 #' 2025/06/11 追加変数の選択、マップ表示、交互作用plotの機能を追加した
+#' @import shiny
+#' @import GDAtools
+#' @import ggplot2
+#' @import dplyr
+#' @importFrom DT datatable
 #' @export
 Shiny_speMCA <- function(df) {
   # require(dplyr)
@@ -17,7 +22,7 @@ Shiny_speMCA <- function(df) {
   # require(ggplot2)
   # require(DT)
   # require(showtext)
-  showtext_auto(TRUE)
+　showtext::showtext_auto(TRUE)
 
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),

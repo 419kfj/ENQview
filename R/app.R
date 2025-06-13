@@ -5,6 +5,18 @@
 #' 2024/12/22 function化、パッケージ化、一段落
 #' 2024/12/21 function化作業開始
 #' 2024/01/30 gitでの管理　を開始
+# #' @importFrom shiny fluidPage tabPanel selectInput plotOutput renderPlot h1 h2 h3
+# #' @importFrom shiny sidebarPanel mainPanel tabsetPanel titlePanel sidebarLayout
+# #' @importFrom shiny uiOutput downloadButton tableOutput
+#' @import GDAtools
+#' @import shiny
+#' @import GGally
+#' @importFrom DT DTOutput renderDT
+#' @importFrom gt gt_output render_gt
+#' @importFrom gtsummary as_gt bold_labels add_p tbl_cross
+#' @importFrom vcd mosaic structable labeling_values
+#' @importFrom purrr reduce
+#' @importFrom tibble as.tibble
 #' @export
 ENQview <- function(data.df=Bunka2,...){
 #ENQview <- function(data.df=cyder2024a.all.df,...){
@@ -19,7 +31,7 @@ ENQview <- function(data.df=Bunka2,...){
 # library(gt)
 # library(readxl)
 # library(showtext)
-showtext_auto(TRUE)
+showtext::showtext_auto(TRUE)
 
 #-------------------------------------------------------------------------------
 # Define UI for application
@@ -131,7 +143,7 @@ ui <- fluidPage("調査データ簡易集計",
 )
 
 #-------------------------------------------------------------------------------
-# Define server logic required to draw outlut tables and graphs
+# Define server logic required to draw output tables and graphs
 #
 server <- function(input, output, session) {
 #    addResourcePath("data", "data")
@@ -171,15 +183,15 @@ server <- function(input, output, session) {
     })
   # barplot by ggplot2
     output$barchart <- renderPlot({            # input$select_input_data_for_hist
-      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% rename(V1=1) %>%
+      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% dplyr::rename(V1=1) %>%
         mutate(rate=100 * .data[["n"]]/sum(.data[["n"]])) %>%
-        ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$variables[1])
+        ggplot2::ggplot(aes(x=V1,y=rate)) + ggplot2::geom_col(aes(fill=V1)) + ggplot2::ggtitle(input$variables[1])
     })
 
     output$barchart2 <- renderPlot({
-      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% rename(V1=1) %>%
-        mutate(rate=100* .data[["n"]]/ sum(.data[["n"]])) %>%
-        ggplot(aes(x=V1,y=rate)) + geom_col(aes(fill=V1)) + ggtitle(input$select_input_data_for_hist)
+      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% dplyr::rename(V1=1) %>%
+        dplyr::mutate(rate=100* .data[["n"]]/ sum(.data[["n"]])) %>%
+        ggplot2::ggplot(aes(x=V1,y=rate)) + ggplot2::geom_col(aes(fill=V1)) + ggplot2::ggtitle(input$select_input_data_for_hist)
     })
 
 
@@ -187,17 +199,17 @@ server <- function(input, output, session) {
     # GGally::ggpairs
     output$pairs <- renderPlot({
       data_for_plot()[,c(input$variables[1],input$select_input_data_for_cross)] %>%
-        ggpairs(mapping = aes(color = !!as.name(input$variables[1]))) +
-        theme(axis.text.x = element_text(angle=45,hjust = 1)) +
-        ggtitle(input$variables[1]) -> p
+        GGally::ggpairs(mapping = aes(color = !!as.name(input$variables[1]))) +
+          ggplot2::theme(axis.text.x = element_text(angle=45,hjust = 1)) +
+          ggplot2::ggtitle(input$variables[1]) -> p
       p
     })
 
     output$pairs_multi<- renderPlot({
       data_for_plot()[,input$variables] %>%
-        ggpairs(mapping = aes(color = !!as.name(input$variables))) +
-        theme(axis.text.x = element_text(angle=45,hjust = 1)) +
-        ggtitle(input$variables) -> p
+        GGally::ggpairs(mapping = aes(color = !!as.name(input$variables))) +
+          ggplot2::theme(axis.text.x = element_text(angle=45,hjust = 1)) +
+          ggplot2::ggtitle(input$variables) -> p
       p
     })
 
@@ -205,8 +217,6 @@ server <- function(input, output, session) {
     output$crosschart <- renderPlot({
       .tbl <- table(data_for_plot()[[input$select_input_data_for_cross]],
                     data_for_plot()[[input$variables[1]]])  #select_input_data_for_hist
-
-
             .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
       tab <- ifelse(.tbl.p < 1, NA, .tbl.p)
 
@@ -227,8 +237,8 @@ server <- function(input, output, session) {
       data_for_plot()[,c(input$variables[1], #select_input_data_for_hist,
                          input$select_input_data_for_cross,
                          input$select_input_data_for_layer)] %>%
-          structable() %>%
-          mosaic(condvars = 3, # input$select_input_data_for_layer を指定
+          vcd::structable() %>%
+          vcd::mosaic(condvars = 3, # input$select_input_data_for_layer を指定
                  split_vertical = TRUE,# 分割は垂直
                  shade=TRUE,las=2,
                  labeling=labeling_values
@@ -287,15 +297,15 @@ server <- function(input, output, session) {
         # 選択された変数を用いてプロット
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
         selected_data %>% dplyr::summarise(across(everything(), ~ mean(. == 1,na.rm =TRUE))) %>%
-          pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
+          tidyr::pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
 
-        ggplot(ratio_df, aes(x = Question, y = Ratio)) +
-          geom_bar(stat = "identity", fill = "skyblue") +
-          scale_y_continuous(labels = scales::percent_format()) +
-          labs(title = selected_vars,
+        ggplot2::ggplot(ratio_df, aes(x = Question, y = Ratio)) +
+          ggplot2::geom_bar(stat = "identity", fill = "skyblue") +
+          ggplot2::scale_y_continuous(labels = scales::percent_format()) +
+          ggplot2::labs(title = selected_vars,
                x = "質問項目",
                y = "割合（% )") +
-          theme_minimal()
+          ggplot2::theme_minimal()
       }
     })
 
@@ -307,15 +317,16 @@ server <- function(input, output, session) {
         # 選択された変数を用いてプロット
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
         selected_data %>% dplyr::summarise(across(everything(), ~ mean(. == 1,na.rm =TRUE))) %>%
-          pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
+          tidyr::pivot_longer(cols = everything(), names_to = "Question", values_to = "Ratio") -> ratio_df
 
-        ratio_df %>% ggplot(aes(x=Ratio, y=reorder(Question,Ratio))) + # 並べ替え
-          geom_point(size=3) +
-          theme_bw() +
-          theme(panel.grid.major.x = element_blank(),
-                panel.grid.minor.x = element_blank(),
-                panel.grid.major.y = element_line(colour="grey60",linetype="dashed")) +
-          labs(title = selected_vars,
+        ratio_df %>%
+          ggplot2::ggplot(aes(x=Ratio, y=reorder(Question,Ratio))) + # 並べ替え
+          ggplot2::geom_point(size=3) +
+          ggplot2::theme_bw() +
+          ggplot2::theme(panel.grid.major.x = element_blank(),
+                   panel.grid.minor.x = element_blank(),
+                   panel.grid.major.y = element_line(colour="grey60",linetype="dashed")) +
+          ggplot2::labs(title = selected_vars,
                x = "割合（% )",y = "質問項目")
       }
     })
@@ -329,19 +340,19 @@ server <- function(input, output, session) {
         data_for_plot() %>% group_by(!!!rlang::syms(gp_vari)) %>%
           dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl # ここで、行を選択すればいよい
         MA_group_tbl %>% select(-度数) %>%
-          pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
+          tidyr::pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
                        names_to = "variable",         # 変数名の列を"variable"として格納
                        values_to = "value") -> df_long
 
-        ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable,
+        ggplot2::ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable,
                             shape =variable, group = variable)) +
-          geom_line(aes(color = variable)) +  # 折れ線グラフ
-          geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら )
-          labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
-          theme_minimal() +  # 見た目をシンプルに
-          scale_color_discrete() +
+          ggplot2::geom_line(aes(color = variable)) +  # 折れ線グラフ
+          ggplot2::geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら )
+          ggplot2::labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
+          ggplot2::theme_minimal() +  # 見た目をシンプルに
+          ggplot2::scale_color_discrete() +
           #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
-          scale_shape_manual(values = 1:length(selected_vars))
+          ggplot2::scale_shape_manual(values = 1:length(selected_vars))
         }
     })
 
@@ -353,21 +364,21 @@ server <- function(input, output, session) {
         selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
 
         gp_vari <- input$select_input_data_for_layer # 層化する変数
-        data_for_plot() %>% group_by(!!!rlang::syms(gp_vari)) %>%
+        data_for_plot() %>% dplyr::group_by(!!!rlang::syms(gp_vari)) %>%
         dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl
 
         MA_group_tbl %>% select(-度数) %>%
-          pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
+          tidyr::pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
                        names_to = "variable",         # 変数名の列を"variable"として格納
                        values_to = "value") -> df_long
 
 
-        ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
-          geom_line() + geom_point() +
-          facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
-          labs(x = "Group", y = "Value") +
-          theme_minimal() +
-          theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
+        ggplot2::ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, color = variable, group = variable)) +
+          ggplot2::geom_line() + geom_point() +
+          ggplot2::facet_wrap(~ variable,ncol=3) +# scales = "free_y") + # 各変数ごとにfacetで分割
+          ggplot2::labs(x = "Group", y = "Value") +
+          ggplot2::theme_minimal() +
+          ggplot2::theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
 
       }
     })
@@ -391,14 +402,14 @@ server <- function(input, output, session) {
       cat_tbl
 
       rownames(t(cat_tbl)) -> rnames
-      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>%
-        mutate(Like=`++`+`+`) %>%
-        arrange(desc(Like)) %>%
-        select(IDn) %>% unlist %>%
+      t(cat_tbl) %>% tibble::as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>%
+        dplyr::mutate(Like=`++`+`+`) %>%
+        dplyr::arrange(desc(Like)) %>%
+        dplyr::select(IDn) %>% unlist %>%
         setNames(NULL) -> order_vec
 
       t(cat_tbl)[order_vec,] %>%
-        mosaic(shade = TRUE,rot_labels = c(0, 0),
+        vcd::mosaic(shade = TRUE,rot_labels = c(0, 0),
                margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
 
     })
@@ -442,14 +453,14 @@ server <- function(input, output, session) {
       cat_tbl
 
       rownames(t(cat_tbl)) -> rnames
-      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>%
+      t(cat_tbl) %>% as.tibble() %>% dplyr::mutate(ID=rnames,IDn=1:length(rnames)) %>%
 #        mutate(Like=`++`+`+`) %>%
-        arrange(desc(A)) %>%
-        select(IDn) %>% unlist %>%
+        dplyr::arrange(desc(A)) %>%
+        dplyr::select(IDn) %>% unlist %>%
         setNames(NULL) -> order_vec
 
 #      t(cat_tbl)[order_vec,]
-      t(cat_tbl) %>% mosaic(shade = TRUE,rot_labels = c(0, 0),
+      t(cat_tbl) %>% vcd::mosaic(shade = TRUE,rot_labels = c(0, 0),
                                         margins=c(left=9,top=5),just_labels=c(left="right",top="left"))
 
     })
@@ -482,10 +493,10 @@ server <- function(input, output, session) {
     output$GridAnswerG_mosaic <- renderPlot({
 
       selected_vars <- input$variables
-      vectors <- map(selected_vars, ~ {
+      vectors <- purrr::map(selected_vars, ~ {
          data_for_plot() %>% select(selected_vars) %>%
-          count(!!sym(.x)) %>%  # 選択した列ごとにカウント
-          pull(1)               # 最初の列のユニークな値を取得
+          dplyr::count(!!sym(.x)) %>%  # 選択した列ごとにカウント
+          dplyr::pull(1)               # 最初の列のユニークな値を取得
       })
 
       union_all <- reduce(vectors, union)
@@ -505,14 +516,14 @@ server <- function(input, output, session) {
       names(cat_tbl) <- ifelse(is.na(names(cat_tbl)), "NA", names(cat_tbl))
 
       rownames(t(cat_tbl)) -> rnames
-      t(cat_tbl) %>% as.tibble() %>% mutate(ID=rnames,IDn=1:length(rnames)) %>% # ★t(cat_tbl) %>% as.tibble() でエラー
-        arrange(desc(union_all[1])) %>%
-        select(IDn) %>% unlist %>%
+      t(cat_tbl) %>% as.tibble() %>% dplyr::mutate(ID=rnames,IDn=1:length(rnames)) %>% # ★t(cat_tbl) %>% as.tibble() でエラー
+        dplyr::arrange(desc(union_all[1])) %>%
+        dplyr::select(IDn) %>% unlist %>%
         setNames(NULL) -> order_vec
 
       t(cat_tbl)[order_vec,] %>%
       #t(cat_tbl) %>%
-        mosaic(shade = TRUE,rot_labels = c(0, 0),
+        vcd::mosaic(shade = TRUE,rot_labels = c(0, 0),
                             margins=c(left=12,top=5),just_labels=c(left="right",top="left"))
 
     })
@@ -522,10 +533,10 @@ server <- function(input, output, session) {
     output$GridAnswerG_CA <- renderPlot({
       selected_vars <- input$variables
       #browser()
-      vectors <- map(selected_vars, ~ {
-        data_for_plot() %>% select(selected_vars) %>%
-          count(!!sym(.x)) %>%  # 選択した列ごとにカウント
-          pull(1)               # 最初の列のユニークな値を取得
+      vectors <- purrr::map(selected_vars, ~ {
+        data_for_plot() %>% dplyr::select(selected_vars) %>%
+          dplyr::count(!!sym(.x)) %>%  # 選択した列ごとにカウント
+          dplyr::pull(1)               # 最初の列のユニークな値を取得
       })
 
       union_all <- reduce(vectors, union)
