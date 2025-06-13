@@ -17,9 +17,12 @@
 Shiny_speMCA <- function(df) {
 　showtext::showtext_auto(TRUE)
   get_pkg_version <- function() {
-    desc <- read.dcf("DESCRIPTION")
-    desc[1, "Version"]
+    as.character(utils::packageVersion("ENQview"))
   }
+  # get_pkg_version <- function() {
+  #   desc <- read.dcf("DESCRIPTION")
+  #   desc[1, "Version"]
+  # }
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),
     tags$p(
