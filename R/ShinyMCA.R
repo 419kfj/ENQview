@@ -17,13 +17,6 @@
 #' @export
 Shiny_speMCA <- function(df) {
 　showtext::showtext_auto(TRUE)
-#  get_pkg_version <- function() {
-#    as.character(utils::packageVersion("ENQview"))
-#  }
-  # get_pkg_version <- function() {
-  #   desc <- read.dcf("DESCRIPTION")
-  #   desc[1, "Version"]
-  # }
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),
     tags$p(
@@ -49,7 +42,15 @@ Shiny_speMCA <- function(df) {
         selectInput("inter_v2", "交互作用v1を選んでください",
                     choices = names(df),
                     multiple = FALSE),
-        downloadButton("download_mca", "speMCA結果をダウンロード")  # ← ダウンロードボタン
+        downloadButton("download_mca", "speMCA結果をダウンロード"),  # ← ダウンロードボタン
+
+        # 変数選択
+        selectInput("var_ellipses", "集中楕円表示変数を選んでください",
+                    choices = names(df),
+                    multiple = FALSE),
+        # カテゴリ選択（動的に更新される）
+        uiOutput("kellipses_cat_selector"),
+
       ),
       mainPanel(
         tabsetPanel(
@@ -68,11 +69,13 @@ Shiny_speMCA <- function(df) {
           tabPanel("データ表示",DTOutput("data_table")),
           tabPanel("supvarsの情報", verbatimTextOutput("supvars_out")),
           tabPanel("変数マップ＋supvars", plotOutput("supvars_map")),
-         tabPanel("交互作用plot", plotOutput("interaction_map"))
+          tabPanel("交互作用plot", plotOutput("interaction_map")),
+          tabPanel("集中楕円",plotOutput("kellipses_map"))
+          )
         )
       )
     )
-  )
+
 # ----------------------------------------------------------------------------
 #         SERVER part
 # ----------------------------------------------------------------------------
@@ -269,6 +272,7 @@ Shiny_speMCA <- function(df) {
       req(input$variables)  # active変数がある前提
       vars <- input$variables
       junk <- input$excluded_cats
+      kellipse_cat <- input$category_selector
       tagList(
         h4("Active 変数"),
         if (length(vars) > 0) {
@@ -281,9 +285,58 @@ Shiny_speMCA <- function(df) {
           HTML(paste("<ul>", paste(paste0("<li>", junk, "</li>"), collapse = ""), "</ul>"))
         } else {
           em("なし")
+        },
+        h4("集中楕円描画カテゴリ"),
+        if (!is.null(kellipse_cat) && length(kellipse_cat) > 0) {
+          HTML(paste("<ul>", paste(paste0("<li>", kellipse_cat, "</li>"), collapse = ""), "</ul>"))
+        } else {
+          em("なし")
         }
       )
     })
+
+    ## 集中楕円の描画
+    #
+    # 選択された変数のカテゴリを取得
+    observeEvent(input$var_ellipses, {
+      req(input$var_ellipses)
+#      browser()##
+      var <- df[[input$var_ellipses]]
+      levels <- levels(as.factor(var))
+
+      updateCheckboxGroupInput(session, "selected_categories",
+                               choices = levels,
+                               selected = levels)
+    })
+
+    # カテゴリ選択UI
+    output$kellipses_cat_selector <- renderUI({
+      req(input$var_ellipses)
+      var <- df[[input$var_ellipses]]
+      levels <- levels(as.factor(var))
+
+      checkboxGroupInput("selected_categories",
+                         "表示するカテゴリ",
+                         choices = levels,
+                         selected = levels)
+    })
+
+    # 楕円付き個体マップの描画
+    output$kellipses_map <- renderPlot({
+      req(input$var_ellipses, input$selected_categories)
+      resmca <- mca_result()
+      var <- df[[input$var_ellipses]]
+      base_map_ind <- GDAtools::ggcloud_indiv(resmca, col = "lightgrey")
+
+      # カテゴリ番号の取得
+      var_factor <- as.factor(var)
+      sel_index <- which(levels(var_factor) %in% input$selected_categories)
+
+      # 楕円を重ねる
+      GDAtools::ggadd_kellipses(base_map_ind, resmca, var = var_factor, sel = sel_index) +
+        coord_fixed(ratio=1)
+    },width = "auto", height = 600)
+
   }
 # ----------------------------------------------------------------------------
 #      ShinyApp実行！
