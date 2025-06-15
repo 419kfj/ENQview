@@ -25,6 +25,7 @@ Shiny_speMCA(taste_J) #分析対象データのspeMCA分析
 
 ## 履歴
 ```r
+2025/06/15　Shiny_GDAとしてレイアウトを変更。eta2など、1−2軸、3−2軸、1−3軸のマップも描画するようにした
 2025/06/14　集中楕円の描画機能を組み込み
 2025/06/13　GitHub登録のファイルを整理。必要なPackage類をDESCRUPTIONに記述し、各Rファイルでは、#' @importや#' @importFrom で対応した
 2025/05/27　２変数のクロスの表示、mosaic plot、カイ２乗検定など、tableのなかで、df内の変数参照を変更。[,vari]から[[vari]]へ

@@ -47,13 +47,15 @@ Shiny_GDA <- function(df) {
                                 tabsetPanel(
                                   tabPanel("選択変数", uiOutput("selected_info")),
                                   tabPanel("修正慣性率", tableOutput("eig_table"), plotOutput("eig_plot")),
-
+                                  tabPanel("Active変数の相関比", plotOutput("eta2_map",height = "600px"),
+                                           plotOutput("eta2_map_32",height = "600px"),
+                                           plotOutput("eta2_map_13",height = "600px")),
                                   tabPanel("変数空間", plotOutput("var_map",height = "600px"),
                                                        plotOutput("var_map_32",height = "600px"),
-                                                       plotOutput("var_map_13"),height = "600px"),
+                                                       plotOutput("var_map_13",height = "600px")),
                                   tabPanel("個体空間", plotOutput("ind_map",height = "600px"),
                                                        plotOutput("ind_map_32",height = "600px"),
-                                                       plotOutput("ind_map_13"),height = "600px"),
+                                                       plotOutput("ind_map_13",height = "600px")),
                                 )
                               )
                             )
@@ -89,11 +91,17 @@ Shiny_GDA <- function(df) {
                                 uiOutput("kellipses_cat_selector")
                               ),
                               mainPanel(
-                                plotOutput("kellipses_map_12",height = "600px"),
-                                plotOutput("kellipses_map_32",height = "600px"),
-                                plotOutput("kellipses_map_13",height = "600px")
-                              )
-                            )
+                                tabsetPanel(
+                                  tabPanel("集中楕円",plotOutput("kellipses_map_12",height = "600px"),
+                                                      plotOutput("kellipses_map_32",height = "600px"),
+                                                      plotOutput("kellipses_map_13",height = "600px")
+                                  ),
+                                  tabPanel("典型性検定"),
+                                  tabPanel("同質性検定"),
+                                  tabPanel("信頼楕円")
+                                  )
+                              　)
+                            　)
                    ),
 
                    tabPanel("4）参考資料",
@@ -138,6 +146,45 @@ Shiny_GDA <- function(df) {
       if (is.null(res)) return("supvarsの結果がありません")
       print(res)
     })
+
+    ## eta2 map 1−２軸
+    output$eta2_map <- renderPlot({
+      req(mca_result())
+      tryCatch({
+        #browser()##
+        GDAtools::ggeta2_variables(resmca = mca_result(),axes = c(1,2)) + theme(aspect.ratio = 1)
+      }, error = function(e) {
+        message("ggeta2_variables エラー: ", e$message)
+        return(NULL)
+      })
+    },width = "auto", height = 600)
+
+　　##　3−２軸
+    output$eta2_map_32 <- renderPlot({
+      req(mca_result())
+      tryCatch({
+        #browser()##
+        GDAtools::ggeta2_variables(resmca = mca_result(),axes = c(3,2)) + theme(aspect.ratio = 1)
+      }, error = function(e) {
+        message("ggeta2_variables エラー: ", e$message)
+        return(NULL)
+      })
+    },width = "auto", height = 600)
+
+    output$eta2_map_13 <- renderPlot({
+      req(mca_result())
+      tryCatch({
+        #browser()##
+        GDAtools::ggeta2_variables(resmca = mca_result(),axes = c(1,3)) + theme(aspect.ratio = 1)
+      }, error = function(e) {
+        message("ggeta2_variables エラー: ", e$message)
+        return(NULL)
+      })
+    },width = "auto", height = 600)
+
+
+
+
 
     ## ggadd_supvarsを使ってマップを表示
     output$supvars_map <- renderPlot({
