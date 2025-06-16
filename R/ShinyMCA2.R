@@ -61,7 +61,7 @@ Shiny_GDA <- function(df) {
                             )
                    ),
 
-                   tabPanel("2）SDA 構造化データ解析",
+                   tabPanel("2）変数空間分析",
                             sidebarLayout(
                               sidebarPanel(
                                 selectInput("supvars", "追加変数を選んでください",
@@ -72,6 +72,12 @@ Shiny_GDA <- function(df) {
                               mainPanel(
                                 tabsetPanel(
                                   tabPanel("supvarsの情報", verbatimTextOutput("supvars_out")),
+                                  tabPanel("軸ごとのContribution表", h4("dim1 "),
+                                                                     tableOutput('tabcontrib_out_1'),
+                                                                     h4("dim2"),
+                                                                     tableOutput('tabcontrib_out_2'),
+                                                                     h4("dim3"),
+                                                                     tableOutput('tabcontrib_out_3')),
                                   tabPanel("変数マップ＋supvars", plotOutput("supvars_map",height = "600px"),
                                                                   plotOutput("supvars_map_32",height = "600px"),
                                                                   plotOutput("supvars_map_13",height = "600px")),
@@ -96,8 +102,9 @@ Shiny_GDA <- function(df) {
                                                       plotOutput("kellipses_map_32",height = "600px"),
                                                       plotOutput("kellipses_map_13",height = "600px")
                                   ),
-                                  tabPanel("典型性検定"),
-                                  tabPanel("同質性検定"),
+                                  tabPanel("典型性検定/同質性検定", verbatimTextOutput("typi_test_out"),
+                                                                    verbatimTextOutput("homog_test_out")
+                                 ),
                                   tabPanel("信頼楕円")
                                   )
                               　)
@@ -129,6 +136,56 @@ Shiny_GDA <- function(df) {
       jc
     })
 
+    # tabcontrib の出力
+    ## dim1
+    tabcontrib_result_1 <- reactive({
+      req(mca_result())
+      tryCatch({
+        GDAtools::tabcontrib(resmca = mca_result(),dim = 1,best=TRUE, shortlabs = TRUE)
+        }, error = function(e) {
+        message("tabcontribエラー: ", e$message)
+        NULL
+      })
+      })
+    output$tabcontrib_out_1 <- renderTable({
+      res <- tabcontrib_result_1()
+      if (is.null(res)) return("tabcontribの結果がありません")
+      print(res)
+    })
+
+    ## dim2
+    tabcontrib_result_2 <- reactive({
+      req(mca_result())
+      tryCatch({
+        GDAtools::tabcontrib(resmca = mca_result(),dim = 2,best=TRUE, shortlabs = TRUE)
+      }, error = function(e) {
+        message("tabcontribエラー: ", e$message)
+        NULL
+      })
+    })
+    output$tabcontrib_out_2 <- renderTable({
+      res <- tabcontrib_result_2()
+      if (is.null(res)) return("tabcontribの結果がありません")
+      print(res)
+    })
+
+    ## dim3
+    tabcontrib_result_3 <- reactive({
+      req(mca_result())
+      tryCatch({
+        GDAtools::tabcontrib(resmca = mca_result(),dim = 3,best=TRUE, shortlabs = TRUE)
+      }, error = function(e) {
+        message("tabcontribエラー: ", e$message)
+        NULL
+      })
+    })
+    output$tabcontrib_out_3 <- renderTable({
+      res <- tabcontrib_result_3()
+      if (is.null(res)) return("tabcontribの結果がありません")
+      print(res)
+    })
+
+
     # supvars結果を計算
     supvars_result <- reactive({
       req(mca_result(), input$supvars)
@@ -139,13 +196,49 @@ Shiny_GDA <- function(df) {
         NULL
       })
     })
-
     ## supvarsの出力を表示（テキスト）
     output$supvars_out <- renderPrint({
       res <- supvars_result()
       if (is.null(res)) return("supvarsの結果がありません")
       print(res)
     })
+
+    # 典型性検定と同質性検定 #
+    ## 典型性検定
+    typi_test_result <- reactive({
+#      req(mca_result(), input$supvars)
+      tryCatch({
+        GDAtools::dimtypicality(resmca = mca_result(), vars = (df %>% select(input$var_ellipses)),dim = c(1,2,3))
+      }, error = function(e) {
+        message("simtypicalityエラー: ", e$message)
+        NULL
+      })
+    })
+    ## typicality testの出力を表示（テキスト）
+    output$typi_test_out <- renderPrint({
+      res <- typi_test_result()
+      if (is.null(res)) return("typi_testの結果がありません")
+      print(res)
+    })
+
+    # 同質性検定
+    homog_test_result <- reactive({
+      req(mca_result(), input$var_ellipses)
+      tryCatch({
+  #      browser()##
+        GDAtools::homog.test(resmca = mca_result(), var = df[[input$var_ellipses]],dim = c(1,2,3))
+      }, error = function(e) {
+        message("homog.testエラー: ", e$message)
+        NULL
+      })
+    })
+    ## homog.testの出力を表示（テキスト）
+    output$homog_test_out <- renderPrint({
+      res <- homog_test_result()
+      if (is.null(res)) return("homog_testの結果がありません")
+      print(res)
+    })
+
 
     ## eta2 map 1−２軸
     output$eta2_map <- renderPlot({
