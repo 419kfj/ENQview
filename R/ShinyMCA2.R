@@ -38,6 +38,8 @@ Shiny_GDA <- function(df) {
                    tabPanel("1）speMCA実行",
                             sidebarLayout(
                               sidebarPanel(
+                                tags$p(paste0("ENQview Version: ", as.character(utils::packageVersion("ENQview"))),
+                                       style = "color: gray;"),
                                 selectInput("variables", "Active変数を選んでください",
                                             choices = names(df), multiple = TRUE, selectize = FALSE, size = 7),
                                 uiOutput("junk_selector"),
@@ -67,18 +69,19 @@ Shiny_GDA <- function(df) {
                               sidebarPanel(
                                 selectInput("supvars", "追加変数を選んでください",
                                             choices = names(df), multiple = TRUE, selectize = FALSE, size = 7),
+                                h5("v1とv2に同じ変数を指定すると、全体（グレー）にその変数だけを浮かび上がらせて表示します"),
                                 selectInput("inter_v1", "交互作用v1を選んでください", choices = names(df), multiple = FALSE),
                                 selectInput("inter_v2", "交互作用v2を選んでください", choices = names(df), multiple = FALSE)
                               ),
                               mainPanel(
                                 tabsetPanel(
-                                  tabPanel("supvarsの情報", verbatimTextOutput("supvars_out")),
                                   tabPanel("軸ごとのContribution表", h4("dim1 "),
                                                                      tableOutput('tabcontrib_out_1'),
                                                                      h4("dim2"),
                                                                      tableOutput('tabcontrib_out_2'),
                                                                      h4("dim3"),
                                                                      tableOutput('tabcontrib_out_3')),
+                                  tabPanel("supvarsの情報", verbatimTextOutput("supvars_out")),
                                   tabPanel("変数マップ＋supvars", plotOutput("supvars_map",height = "600px"),
                                                                   plotOutput("supvars_map_32",height = "600px"),
                                                                   plotOutput("supvars_map_13",height = "600px")),
