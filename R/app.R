@@ -1,6 +1,7 @@
 #' 調査票データ一覧ツール
 #
 #' 履歴
+#' 2025/06/17 基本集計のカテゴリから「非該当」を除くスクリプトを暫定的にいれた。ちょっと乱暴。
 #' 2025/05/27 tableに投入するdfの参照を[,vari]から[[vari]]に変更。これでエラーがでなくなった。
 #' 2024/12/22 function化、パッケージ化、一段落
 #' 2024/12/21 function化作業開始
@@ -10,7 +11,7 @@
 # #' @importFrom shiny uiOutput downloadButton tableOutput
 #' @import GDAtools
 #' @import shiny
-#' @import GGally
+#' @importFrom GGally ggpairs
 #' @importFrom DT DTOutput renderDT
 #' @importFrom gt gt_output render_gt
 #' @importFrom gtsummary as_gt bold_labels add_p tbl_cross
@@ -171,13 +172,14 @@ server <- function(input, output, session) {
     })
   # barplot by ggplot2
     output$barchart <- renderPlot({            # input$select_input_data_for_hist
-      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% dplyr::rename(V1=1) %>%
+      #browser()##
+      data_for_plot() %>% count(!!!rlang::syms(input$variables[1])) %>% dplyr::rename(V1=1) %>%  filter(V1 != "非該当") %>%
         mutate(rate=100 * .data[["n"]]/sum(.data[["n"]])) %>%
         ggplot2::ggplot(aes(x=V1,y=rate)) + ggplot2::geom_col(aes(fill=V1)) + ggplot2::ggtitle(input$variables[1])
     })
 
     output$barchart2 <- renderPlot({
-      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% dplyr::rename(V1=1) %>%
+      data_for_plot() %>% count(!!!rlang::syms(input$select_input_data_for_hist)) %>% dplyr::rename(V1=1) %>% filter(V1 != "非該当") %>%
         dplyr::mutate(rate=100* .data[["n"]]/ sum(.data[["n"]])) %>%
         ggplot2::ggplot(aes(x=V1,y=rate)) + ggplot2::geom_col(aes(fill=V1)) + ggplot2::ggtitle(input$select_input_data_for_hist)
     })
