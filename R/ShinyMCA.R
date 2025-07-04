@@ -16,7 +16,7 @@
 #' @importFrom DT datatable
 #' @export
 Shiny_speMCA <- function(df) {
-　showtext::showtext_auto(TRUE)
+#　showtext::showtext_auto(TRUE)
   ui <- fluidPage(
     titlePanel("speMCA 分析アプリ"),
     tags$p(
@@ -80,6 +80,7 @@ Shiny_speMCA <- function(df) {
 #         SERVER part
 # ----------------------------------------------------------------------------
   server <- function(input, output, session) {
+    showtext::showtext_auto(TRUE)
     # junkカテゴリ取得
     junk_cat <- reactive({
       req(input$variables)
@@ -121,7 +122,7 @@ Shiny_speMCA <- function(df) {
         message("ggadd_supvars エラー: ", e$message)
         return(NULL)
       })
-    },width = "auto", height = 600)
+    },width = "auto", height = 600,res = 120)
 
     ## 交互作用Plot
     output$interaction_map <- renderPlot({
@@ -136,7 +137,7 @@ Shiny_speMCA <- function(df) {
         message("ggadd_interaction エラー: ", e$message)
         return(NULL)
       })
-    },width = "auto", height = 600)
+    },width = "auto", height = 600,res = 120)
 
 
     # junk カテゴリ選択 for speMCA
@@ -221,25 +222,26 @@ Shiny_speMCA <- function(df) {
 
     ## 変数マップの表示
     output$var_map <- renderPlot({
+      showtext::showtext_auto(TRUE)
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_variables(res) + theme(aspect.ratio=1) +
         ggtitle("変数マップ 1−2軸")
-    },width="auto",height="auto")#600)
+    },width="auto",height="auto",res = 120)
 
     output$var_map_32 <- renderPlot({
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_variables(res,axes = c(3,2)) + theme(aspect.ratio=1)  +
         ggtitle("変数マップ 3−2軸")
-    },width="auto",height="auto")#600)
+    },width="auto",height="auto",res = 120)
 
     output$var_map_13 <- renderPlot({
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_variables(res,axes = c(1,3)) + theme(aspect.ratio=1)  +
         ggtitle("変数マップ 1−3軸")
-    },width="auto",height="auto")#600)
+    },width="auto",height="auto",res = 120)
 
 
     ##　個体マップの表示
@@ -247,19 +249,19 @@ Shiny_speMCA <- function(df) {
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_indiv(res) + theme(aspect.ratio=1)
-    },width = "auto", height = 600)
+    },width = "auto", height = 600,res = 120)
 
     output$ind_map_32 <- renderPlot({
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_indiv(res, axes = c(3,2)) + theme(aspect.ratio=1)
-    },width = "auto", height = 600)
+    },width = "auto", height = 600,res = 120)
 
     output$ind_map_13 <- renderPlot({
       res <- mca_result()
       if (is.null(res)) return(NULL)
       ggcloud_indiv(res, axes = c(1,3)) + theme(aspect.ratio=1)
-    },width = "auto", height = 600)
+    },width = "auto", height = 600,res = 120)
 
 
     ## データ表の表示
@@ -335,7 +337,7 @@ Shiny_speMCA <- function(df) {
       # 楕円を重ねる
       GDAtools::ggadd_kellipses(base_map_ind, resmca, var = var_factor, sel = sel_index) +
         coord_fixed(ratio=1)
-    },width = "auto", height = 600)
+    },width = "auto", height = 600,res = 120)
 
   }
 # ----------------------------------------------------------------------------
