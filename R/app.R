@@ -111,6 +111,12 @@ ui <- fluidPage("調査データ簡易集計",
                                         plotOutput("MAplot_lineDotwarp",width = 600, height = 600)
                                ),
 
+                               tabPanel("層化 MA plot2",
+                                        h2("層化MA変数集計（Legendなし）"),
+                                        plotOutput("MAplot_lineDot2",width = 600, height = 400),
+                                        plotOutput("MAplot_lineDotwarp",width = 600, height = 600)
+                               ),
+
                                tabPanel("Grid回答 General mosaic表示",
                                         h2("Grid回答mosaic表示"),
                                         plotOutput("GridAnswerG_mosaic",width = 600, height = 600),
@@ -345,6 +351,35 @@ server <- function(input, output, session) {
           ggplot2::scale_shape_manual(values = 1:length(selected_vars))
         }
     })
+
+    # 層化MA折れ線グラフ(legend なし)
+    output$MAplot_lineDot2 <- renderPlot({
+      selected_vars <- input$variables
+      if (length(selected_vars) > 0) {
+        selected_data <- data_for_plot()[, selected_vars, drop = FALSE]
+        gp_vari <- input$select_input_data_for_layer # 層化変数
+        data_for_plot() %>% group_by(!!!rlang::syms(gp_vari)) %>%
+          dplyr::summarise(度数=n(),across(selected_vars, ~ sum(. == 1,na.rm = TRUE)/n(),.names="ratio_{col}")) -> MA_group_tbl # ここで、行を選択すればいよい
+        MA_group_tbl %>% select(-度数) %>%
+          tidyr::pivot_longer(cols = starts_with("ratio_"),  # ratio_で始まる列 (変数1〜8) をlong形式に変換
+                              names_to = "variable",         # 変数名の列を"variable"として格納
+                              values_to = "value") -> df_long
+
+        ggplot2::ggplot(df_long, aes(x = !!as.name(gp_vari), y = value, #color = variable,
+                                     shape =variable, group = variable)) +
+          ggplot2::geom_line(aes(color = variable)) +  # 折れ線グラフ
+          ggplot2::geom_point(aes(color = variable),size=4) + # ポイントを追加（必要なら )
+          ggplot2::labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
+          ggplot2::theme_minimal() +  # 見た目をシンプルに
+          ggplot2::scale_color_discrete() +
+          #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
+          ggplot2::scale_shape_manual(values = 1:length(selected_vars)) +
+          ggplot2::theme(legend.position = 'none')
+      }
+    })
+
+
+
 
     # 層化MA warp Faset
 
