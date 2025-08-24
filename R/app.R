@@ -216,8 +216,7 @@ server <- function(input, output, session) {
             .tbl.p <- round(100 * prop.table(.tbl ,margin = 1),1)
       tab <- ifelse(.tbl.p < 1, NA, .tbl.p)
 
-      data_for_plot()[,c(input$variables[1],     #select_input_data_for_hist,
-                         input$select_input_data_for_cross)] %>%
+      data_for_plot()[,c(input$select_input_data_for_cross,input$variables[1])] %>% #,     #select_input_data_for_hist,
         vcd::structable() %>%
         vcd::mosaic(shade=TRUE,las=2,
                labeling=labeling_values
@@ -252,8 +251,8 @@ server <- function(input, output, session) {
       )
 
     output$my_gt_table2 <- render_gt(
-      data_for_plot() %>% tbl_cross(col = input$select_input_data_for_cross,
-                                    row = input$variables[1], #select_input_data_for_hist,
+      data_for_plot() %>% tbl_cross(row = input$select_input_data_for_cross,
+                                    col = input$variables[1], #select_input_data_for_hist,
                                     percent = "row") %>%
         add_p(test="chisq.test") %>%
         bold_labels() %>%
