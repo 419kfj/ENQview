@@ -1,12 +1,34 @@
+#' 層化MAplotの呼び出し方法
+#'
+#' @param df 分析対象の含まれたdf
+#' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
+#' @param layer_val 層化する変数名(char)
+#' @export
+plot_layered_MA <- function(df,selected_vars,layer_val,...){
+  make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
+    LayeredMAplot(selected_vars,layer_val)
+}
+
+#' 層化MAplot/facet の呼び出し方法
+#'
+#' @param df 分析対象の含まれたdf
+#' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
+#' @param layer_val 層化する変数名(char)
+#' @export
+plot_layered_facet_MA <- function(df,selected_vars,layer_val,...){
+  make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
+    facet_layered_MA(selected_vars,layer_val)
+}
+
 #’ 層化MAplotのための層化MAtableの構築
 #'
 #' Input　
-#' df  入力データフレーム（全体）df
-#' selected_vars 選択したMA変数（Q7#1...）chars
-#' layer_val 層化変数名 文字列 char
+#' @param df 入力データフレーム（全体）df MAは、1/0にrecodeしてあること
+#' @param selected_vars 選択したMA変数（Q7#1...）chars 文字列でも変数番号でもよい
+#' @param layer_val 層化変数名 文字列 char
 #'
 #' Output
-#' df format
+#' @return df format
 #' @export
 make_grouped_MA_tbl <- function(df,selected_vars,layer_val,...){
   data_for_plot <- df
@@ -42,6 +64,9 @@ make_bayes_vec　<- function(度数,Freq,...){
   return(res.bayes$post)
 }
 
+
+#" ベイス補正版のmake_grouped_MA_tbl
+#"
 #' @export
 make_grouped_MA_tbl2 <- function(df,selected_vars,layer_val,...){　# bayes補正付きの表作成
   data_for_plot <- df
@@ -65,6 +90,9 @@ make_grouped_MA_tbl2 <- function(df,selected_vars,layer_val,...){　# bayes補�
 #' グラフ描画用function
 #'
 #' 層化MAplot（Dot plot）
+#' @param MA_group_tbl `make_grouped_MA_tbl`で生成された層化変数でgroup化した分析対象の含まれたdf
+#' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
+#' @param layer_val 層化する変数名(char)
 #' @export
 LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
   MA_group_tbl %>% select(-度数) %>%
@@ -86,6 +114,9 @@ LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
 #----
 #
 #' ファセット表示
+#' @param MA_group_tbl `make_grouped_MA_tbl`で生成された層化変数でgroup化した分析対象の含まれたdf
+#' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
+#' @param layer_val 層化する変数名(char)
 #' @export
 facet_layered_MA <- function(MA_group_tbl,selected_vars,layer_val,...){
   MA_group_tbl %>% select(-度数) %>%
@@ -101,9 +132,4 @@ facet_layered_MA <- function(MA_group_tbl,selected_vars,layer_val,...){
     theme(legend.position = "none",axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1))  # ラベルを90度回転
 }
 
-#' sample script
-#' @export
-plot_layered_MA <- function(df,selected_vars,layer_val,...){
-  make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
-  LayeredMAplot(selected_vars,layer_val)
-}
+
