@@ -3,21 +3,42 @@
 #' @param df 分析対象の含まれたdf
 #' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
 #' @param layer_val 層化する変数名(char)
+#' @param sel 層化変数で利用するカテゴリ番号。defaultはすべて
+#' @param legend_pos 凡例の表示場所。"none","top","bottom",default は"right"
+#' @return list(tbl = MAtbl, plot = p)
+#' res <- plot_layered_MA(df, 50:70, "gender")
+#' res$plot   # グラフ
+#' res$tbl    # データ
 #' @export
-plot_layered_MA <- function(df,selected_vars,layer_val,...){
-  make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
-    LayeredMAplot(selected_vars,layer_val)
+plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="right"){
+  sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
+  ENQview::make_grouped_MA_tbl(df,50:70,layer_val) %>% slice(sel_pos) -> MAtbl
+  p <- MAtbl %>% ENQview::LayeredMAplot(50:70,layer_val) + theme(legend.position=legend_pos)
+  return(list(tbl = MAtbl, plot = p))
 }
+
+# plot_layered_MA <- function(df,selected_vars,layer_val,...){
+#   make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
+#     LayeredMAplot(selected_vars,layer_val)
+# }
+
 
 #' 層化MAplot/facet の呼び出し方法
 #'
 #' @param df 分析対象の含まれたdf
 #' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
 #' @param layer_val 層化する変数名(char)
+#' @param sel 層化変数で利用するカテゴリ番号。defaultはすべて
+#' @return list(tbl = MAtbl, plot = p)
+#' res <- plot_layered_MA(df, 50:70, "gender")
+#' res$plot   # グラフ
+#' res$tbl    # データ
 #' @export
-plot_layered_facet_MA <- function(df,selected_vars,layer_val,...){
-  make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
-    facet_layered_MA(selected_vars,layer_val)
+plot_layered_facet_MA <- function(df,selected_vars,layer_val,sel=NULL...){
+  sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
+  ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
+  p <- MAtbl %>% facet_layered_MA(selected_vars,layer_val)
+  return(list(tbl = MAtbl, plot = p))
 }
 
 #’ 層化MAplotのための層化MAtableの構築
