@@ -17,11 +17,6 @@ plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="righ
   return(list(tbl = MAtbl, plot = p))
 }
 
-# plot_layered_MA <- function(df,selected_vars,layer_val,...){
-#   make_grouped_MA_tbl(df,selected_vars,layer_val) %>%
-#     LayeredMAplot(selected_vars,layer_val)
-# }
-
 
 #' 層化MAplot/facet の呼び出し方法
 #'
@@ -34,7 +29,7 @@ plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="righ
 #' res$plot   # グラフ
 #' res$tbl    # データ
 #' @export
-plot_layered_facet_MA <- function(df,selected_vars,layer_val,sel=NULL...){
+plot_layered_facet_MA <- function(df,selected_vars,layer_val,sel=NULL,...){
   sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
   ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
   p <- MAtbl %>% facet_layered_MA(selected_vars,layer_val)
@@ -128,7 +123,6 @@ LayeredMAplot <- function(MA_group_tbl,selected_vars,layer_val,...){
     labs(x = gp_vari, y = "割合", shape = "変数",color = "変数") +  # 軸ラベルと凡例の設定
     theme_minimal() +  # 見た目をシンプルに
     scale_color_discrete() +
-    #  scale_color_discrete(labels = names(df)[74:89]) + # 変数のラベルを設定
     scale_shape_manual(values = 1:length(selected_vars))
 }
 
