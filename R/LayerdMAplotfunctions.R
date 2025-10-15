@@ -12,8 +12,8 @@
 #' @export
 plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="right"){
   sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
-  ENQview::make_grouped_MA_tbl(df,50:70,layer_val) %>% slice(sel_pos) -> MAtbl
-  p <- MAtbl %>% ENQview::LayeredMAplot(50:70,layer_val) + theme(legend.position=legend_pos)
+  ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
+  p <- MAtbl %>% ENQview::LayeredMAplot(selected_vars,layer_val) + theme(legend.position=legend_pos)
   return(list(tbl = MAtbl, plot = p))
 }
 

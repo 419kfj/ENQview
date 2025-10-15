@@ -19,7 +19,7 @@
 #' @importFrom purrr reduce
 #' @importFrom tibble as.tibble
 #' @export
-ENQview <- function(data.df=Bunka2,...){
+ENQview <- function(data.df=taste_J,...){
 #ENQview <- function(data.df=cyder2024a.all.df,...){
 
 showtext::showtext_auto(TRUE)
