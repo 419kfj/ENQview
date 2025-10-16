@@ -6,7 +6,7 @@
 #' @param sel 層化変数で利用するカテゴリ番号。defaultはすべて
 #' @param legend_pos 凡例の表示場所。"none","top","bottom",default は"right"
 #' @return list(tbl = MAtbl, plot = p)
-#' res <- plot_layered_MA(df, 50:70, "gender")
+#' res <- plot_layered_MA(df, 50:70, "gender")　50:70は、サンプル。selected_varsで入力
 #' res$plot   # グラフ
 #' res$tbl    # データ
 #' @export
