@@ -2,7 +2,7 @@
 #'
 #' @param df 分析対象の含まれたdf
 #' @param selected_vars 分析対象のMAの変数名、もしくは変数番号
-#' @param layer_val 層化する変数名(char)
+#' @param layer_val 層化する変数名(char)、もしくは変数番号 2025/11/11修正
 #' @param sel 層化変数で利用するカテゴリ番号。defaultはすべて
 #' @param legend_pos 凡例の表示場所。"none","top","bottom",default は"right"
 #' @return list(tbl = MAtbl, plot = p)
@@ -12,6 +12,7 @@
 #' @export
 plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="right"){
   sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
+  layer_val <- ifelse(is.numeric(layer_val),colnames(df[,layer_val] ),layer_val)
   ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
   p <- MAtbl %>% ENQview::LayeredMAplot(selected_vars,layer_val) + theme(legend.position=legend_pos)
   return(list(tbl = MAtbl, plot = p))
@@ -31,6 +32,7 @@ plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="righ
 #' @export
 plot_layered_facet_MA <- function(df,selected_vars,layer_val,sel=NULL,...){
   sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
+  layer_val <- ifelse(is.numeric(layer_val),colnames(df[,layer_val] ),layer_val)
   ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
   p <- MAtbl %>% facet_layered_MA(selected_vars,layer_val)
   return(list(tbl = MAtbl, plot = p))
