@@ -1,4 +1,5 @@
 #' df から二編数を選択して、Mosaic plotとCAを実行する
+#' ver 1.2  2025/11/17
 #' @import ggplot2
 #' @import FactoMineR
 #' @import shiny
@@ -19,11 +20,11 @@ Shiny_ca <- function(df) {
         tabsetPanel(
           tabPanel("クロス表", DTOutput("cross_table")),
           tabPanel("カイ二乗検定", verbatimTextOutput("chi_result")),
-          tabPanel("モザイクプロット", plotOutput("mosaic_plot",width = "100%")),
+          tabPanel("モザイクプロット", plotOutput("mosaic_plot",width = "100%",width = 600, height = 600)),
           tabPanel("CAマップ",
-                   plotOutput("ca_map_symmetric"),
-                   plotOutput("ca_map_row"),
-                   plotOutput("ca_map_col")),
+                   plotOutput("ca_map_symmetric",width = 600, height = 600),
+                   plotOutput("ca_map_row",width = 600, height = 600),
+                   plotOutput("ca_map_col",width = 600, height = 600)),
           tabPanel("データ確認", DTOutput("original_data"))
         )
       )

@@ -1,6 +1,6 @@
 Package: ENQview
 Title: View the ENQ data and tools
-Version: 0.20.014
+Version: 0.20.015
 Authors@R: 
     person("kazuo", "fujimoto", , "kazuo.fujimoto2007@gmail.com", role = c("aut", "cre"))
 Description: View the ENQ data (one paragraph).
