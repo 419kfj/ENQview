@@ -20,7 +20,7 @@ Shiny_ca <- function(df) {
         tabsetPanel(
           tabPanel("クロス表", DTOutput("cross_table")),
           tabPanel("カイ二乗検定", verbatimTextOutput("chi_result")),
-          tabPanel("モザイクプロット", plotOutput("mosaic_plot",width = "100%",width = 600, height = 600)),
+          tabPanel("モザイクプロット", plotOutput("mosaic_plot",width = 600, height = 600)),#width = "100%"
           tabPanel("CAマップ",
                    plotOutput("ca_map_symmetric",width = 600, height = 600),
                    plotOutput("ca_map_row",width = 600, height = 600),
