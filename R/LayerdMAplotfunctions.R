@@ -13,8 +13,8 @@
 plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="right"){
   sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
   layer_val <- ifelse(is.numeric(layer_val),colnames(df[,layer_val] ),layer_val)
-  ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
-  p <- MAtbl %>% ENQview::LayeredMAplot(selected_vars,layer_val) + theme(legend.position=legend_pos)
+  make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
+  p <- MAtbl %>% LayeredMAplot(selected_vars,layer_val) + theme(legend.position=legend_pos)
   return(list(tbl = MAtbl, plot = p))
 }
 
@@ -33,7 +33,7 @@ plot_layered_MA <- function(df,selected_vars,layer_var,sel=NULL,legend_pos="righ
 plot_layered_facet_MA <- function(df,selected_vars,layer_val,sel=NULL,...){
   sel_pos <- if(is.null(sel)){1:n_distinct(df[[layer_val]])}else{sel}
   layer_val <- ifelse(is.numeric(layer_val),colnames(df[,layer_val] ),layer_val)
-  ENQview::make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
+  make_grouped_MA_tbl(df,selected_vars,layer_val) %>% slice(sel_pos) -> MAtbl
   p <- MAtbl %>% facet_layered_MA(selected_vars,layer_val)
   return(list(tbl = MAtbl, plot = p))
 }
